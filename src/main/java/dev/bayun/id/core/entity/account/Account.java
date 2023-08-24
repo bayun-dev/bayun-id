@@ -1,0 +1,97 @@
+package dev.bayun.id.core.entity.account;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.util.Set;
+import java.util.UUID;
+
+@Data
+@Entity
+@Table(name = "accounts")
+public class Account implements UserDetails, Serializable {
+
+    @Id
+    private UUID id;
+
+    private String username;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "firstName", column = @Column(name = "first_name")),
+            @AttributeOverride(name = "lastName", column = @Column(name = "last_name")),
+            @AttributeOverride(name = "dateOfBirth", column = @Column(name = "date_of_birth")),
+            @AttributeOverride(name = "gender", column = @Column(name = "gender"))
+    })
+    private Person person;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "email", column = @Column(name = "email")),
+            @AttributeOverride(name = "emailConfirmed", column = @Column(name = "email_confirmed"))
+    })
+    private Contact contact;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "lastModifiedDate", column = @Column(name = "last_modified_date"))
+    })
+    private Secret secret;
+
+    @ElementCollection(targetClass = Authority.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "account_authorities", joinColumns = @JoinColumn(name = "account_id"))
+    @Column(name = "authority")
+    @Enumerated(EnumType.STRING)
+    private Set<Authority> authorities;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "registrationDate", column = @Column(name = "registration_date"))
+    })
+    private Details details;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "deactivated", column = @Column(name = "deactivated")),
+            @AttributeOverride(name = "reason", column = @Column(name = "deactivation_reason")),
+            @AttributeOverride(name = "reasonMessage", column = @Column(name = "deactivation_reason_message")),
+            @AttributeOverride(name = "date", column = @Column(name = "deactivation_date"))
+    })
+    private Deactivation deactivation;
+
+    @Override
+    public String getPassword() {
+        return secret.getHash();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        if (deactivation.isDeactivated()) {
+            return !deactivation.getReason().equals(Deactivation.Reason.BLOCKED);
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        if (deactivation.isDeactivated()) {
+            return !deactivation.getReason().equals(Deactivation.Reason.DELETED);
+        } else {
+            return true;
+        }
+    }
+
+}

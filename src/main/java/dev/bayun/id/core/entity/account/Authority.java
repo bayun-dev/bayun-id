@@ -1,0 +1,16 @@
+package dev.bayun.id.core.entity.account;
+
+import org.springframework.security.core.GrantedAuthority;
+
+import java.io.Serializable;
+
+public enum Authority implements GrantedAuthority, Serializable {
+    ROLE_USER,
+    ROLE_ADMIN;
+
+    @Override
+    public String getAuthority() {
+        return this.name();
+    }
+
+}

@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tilt+Neon&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .c-height {
+    @apply h-12;
+  }
+
+  .border-gray {
+    @apply border border-gray-200;
+  }
+}
+
+@layer components {
+
+  .btn {
+    @apply c-height px-4 py-1 cursor-pointer text-center text-2xl text-black font-medium rounded-2xl bg-white hover:bg-gray-50 focus:outline focus:outline-2 focus:outline-black;
+  }
+
+  .btn-black {
+    @apply c-height cursor-pointer text-center text-2xl text-white font-medium rounded-2xl bg-black px-4 py-1 hover:bg-gray-900 focus:outline focus:outline-2 focus:outline-black;
+  }
+
+  .link {
+    @apply text-gray-400 hover:text-blue-400 focus:underline focus:outline-none
+  }
+
+
+
+
+  .btn-blue {
+    @apply h-10 px-4 py-2 bg-blue-400 rounded-md text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-600 aria-[busy=true]:hover:bg-blue-400 aria-[busy=true]:focus:bg-blue-400 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply h-10 px-4 py-2 bg-transparent rounded-md text-gray-600 hover:bg-gray-200 focus:outline-none focus:bg-gray-200 aria-[busy=true]:hover:bg-blue-400 aria-[busy=true]:focus:bg-gray-200 disabled:cursor-not-allowed;
+  }
+
+  .btn-white {
+    @apply h-10 px-4 py-2 bg-white rounded-md text-gray-600 hover:bg-blue-100 focus:outline-none focus:bg-blue-100 aria-[busy=true]:hover:bg-blue-100 aria-[busy=true]:focus:bg-blue-100 disabled:cursor-not-allowed;
+  }
+
+  .btn-red-outline {
+    @apply h-10 px-4 py-2 bg-transparent rounded-md text-red-400 outline-1 outline outline-red-400 hover:bg-red-50 focus:bg-red-50 focus:outline-2 aria-[busy=true]:hover:bg-red-50 aria-[busy=true]:focus:bg-red-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-blue-outline {
+    @apply h-10 px-4 py-2 bg-transparent rounded-md text-blue-400 outline-1 outline outline-blue-400 hover:bg-blue-50 focus:bg-blue-50 focus:outline-2 aria-[busy=true]:hover:bg-blue-50 aria-[busy=true]:focus:bg-blue-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-gray-outline {
+    @apply h-10 px-4 py-2 bg-transparent rounded-md text-gray-400 outline-1 outline outline-gray-400 hover:bg-gray-50 focus:bg-gray-50 focus:outline-2 aria-[busy=true]:hover:bg-gray-50 aria-[busy=true]:focus:bg-gray-50 disabled:cursor-not-allowed;
+  }
+
+  .link-blue {
+    @apply text-blue-400 hover:text-blue-600 focus:outline-none focus:text-blue-600
+  }
+}
+
+@layer utilities {
+  .wh-box {
+    @apply relative after:pt-[100%] after:block after:content-['']
+  }
+
+  .wh-content {
+    @apply absolute inset-0
+  }
+
+  .text-blue {
+    @apply text-blue-400;
+  }
+
+  .text-dark-blue {
+    @apply text-blue-600;
+  }
+
+  .text-error {
+    @apply text-red-600;
+  }
+
+  .border-error {
+    @apply border-red-600;
+  }
+
+  .border-blue {
+    @apply border-blue-400;
+  }
+
+  .border-dark-blue {
+    @apply border-blue-600;
+  }
+
+  .fadeIn {
+    animation: 0.5s fadeIn forwards;
+  }
+
+  .fadeOut {
+    animation: 0.5s fadeOut forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translate(-20px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate(0px, 0px);
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translate(0px, 0px);
+    }
+    to {
+      transform: translate(-20px, 0);
+      opacity: 0;
+    }
+  }
+}
