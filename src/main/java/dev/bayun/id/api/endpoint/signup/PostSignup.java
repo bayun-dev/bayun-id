@@ -6,6 +6,7 @@ import dev.bayun.id.api.schema.response.ErrorResponse;
 import dev.bayun.id.api.schema.response.PostSignupResponse;
 import dev.bayun.id.core.entity.account.Person;
 import dev.bayun.id.core.exception.UsernameOccupiedException;
+import dev.bayun.id.core.modal.AccountCreateToken;
 import dev.bayun.id.core.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,12 +43,16 @@ public class PostSignup {
             throw new UsernameOccupiedException(body.getUsername());
         }
 
-        Person person = new Person();
-        person.setFirstName(body.getFirstName());
-        person.setLastName(body.getLastName());
-        person.setDateOfBirth(body.getDateOfBirth());
-        person.setGender(Person.Gender.fromValue(body.getGender()));
-        accountService.create(body.getUsername(), person, body.getPassword(), body.getEmail());
+        AccountCreateToken token = new AccountCreateToken();
+        token.setUsername(body.getUsername());
+        token.setFirstName(body.getFirstName());
+        token.setLastName(body.getLastName());
+        token.setDateOfBirth(body.getDateOfBirth());
+        token.setGender(body.getGender());
+        token.setPassword(body.getPassword());
+        token.setEmail(body.getEmail());
+
+        accountService.create(token);
 
         return new PostSignupResponse();
     }

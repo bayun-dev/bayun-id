@@ -3,8 +3,8 @@ package dev.bayun.id.core.service;
 import dev.bayun.id.core.entity.account.*;
 import dev.bayun.id.core.exception.AccountNotFoundException;
 import dev.bayun.id.core.exception.AccountRegistrationException;
-import dev.bayun.id.core.modal.AccountUpdateToken;
 import dev.bayun.id.core.modal.AccountCreateToken;
+import dev.bayun.id.core.modal.AccountUpdateToken;
 import dev.bayun.id.core.repository.AccountRepository;
 import dev.bayun.id.core.util.converter.UUIDGenerator;
 import lombok.AllArgsConstructor;
@@ -29,45 +29,6 @@ public class DefaultAccountService implements AccountService {
 
     @Setter
     private PasswordEncoder passwordEncoder;
-
-    @Override
-    @Transactional
-    public Account create(String username, Person person, String password, String email) {
-        long currentTime = System.currentTimeMillis();
-
-        try {
-            Account registered = new Account();
-            registered.setId(UUIDGenerator.getV7());
-            registered.setUsername(username);
-            registered.setPerson(person);
-
-            Contact registeredContact = new Contact();
-            registeredContact.setEmail(email);
-            registeredContact.setEmailConfirmed(false);
-            registered.setContact(registeredContact);
-
-            Secret registeredSecret = new Secret();
-            registeredSecret.setHash(passwordEncoder.encode(password));
-            registeredSecret.setLastModifiedDate(currentTime);
-            registered.setSecret(registeredSecret);
-
-            Details details = new Details();
-            details.setRegistrationDate(currentTime);
-            registered.setDetails(details);
-
-            Deactivation deactivation = new Deactivation();
-            deactivation.setDeactivated(false);
-            registered.setDeactivation(deactivation);
-
-            Set<Authority> registeredAuthorities = new HashSet<>();
-            registeredAuthorities.add(Authority.ROLE_USER);
-            registered.setAuthorities(registeredAuthorities);
-
-            return accountRepository.save(registered);
-        } catch (Exception e) {
-            throw new AccountRegistrationException(e);
-        }
-    }
 
     @Override
     public Account create(AccountCreateToken token) {

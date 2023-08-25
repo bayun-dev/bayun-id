@@ -1,18 +1,14 @@
 package dev.bayun.id.core.service;
 
 import dev.bayun.id.core.entity.account.Account;
-import dev.bayun.id.core.entity.account.Person;
-import dev.bayun.id.core.modal.AccountUpdateToken;
 import dev.bayun.id.core.modal.AccountCreateToken;
+import dev.bayun.id.core.modal.AccountUpdateToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.UUID;
 
 public interface AccountService extends UserDetailsService {
-
-    @Deprecated(forRemoval = true)
-    Account create(String username, Person person, String password, String email);
 
     Account create(AccountCreateToken token);
 
