@@ -35,8 +35,11 @@ Content-Type: application/x-www-form-urlencoded
 
 #### Коды ошибок
 В ходе выполнения могут произойти общие ошибки, а так же:
-* `USERNAME_INVALID` The provided username is not valid.
+* `ACCOUNT_BLOCKED` Account blocked.
+* `ACCOUNT_DELETED` Account deleted.
+* `CREDENTIALS_NOT_FOUND` The provided credentials not found.
 * `PASSWORD_INVALID` The provided password is not valid.
+* `USERNAME_INVALID` The provided username is not valid.
 ---
 
 ### `/login/availability`
