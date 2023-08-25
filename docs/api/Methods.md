@@ -8,6 +8,11 @@
 | [`/login`](#/login)                           | Авторизирует пользователя по имени пользователя и паролю.           |
 | [`/login/availability`](#/login/availability) | Проверяет доступность входа для пользователя по имени пользователя. |
 
+### Регистрация
+| Name                                            | Description                                                                                     |
+|:------------------------------------------------|:------------------------------------------------------------------------------------------------|
+| [`/signup/availability`](#/signup/availability) | Проверяет доступность регистрации для имени пользователя.                                       |
+
 ## Подробное описание методов
 
 ### `/login`
@@ -57,4 +62,27 @@ Content-Type: application/x-www-form-urlencoded
 
 #### Коды ошибок
 В ходе выполнения могут произойти общие ошибки, а так же:  
+* `USERNAME_INVALID` The provided username is not valid.
+---
+
+### `/signup/availability`
+> Проверяет доступность регистрации для имени пользователя.
+
+#### Запрос
+```http request
+POST /api/signup/availability
+Content-Type: application/x-www-form-urlencoded
+```
+
+#### Параметры
+* `username` `string` New username
+
+#### Результат
+Метод возвращает объект, содержащий единственное поле:
+* `available` `boolean` информация о доступности для регистрации.
+  * `true` регистрация доступна.
+  * `false` регистрация недоступна.
+
+#### Коды ошибок
+В ходе выполнения могут произойти общие ошибки, а так же:
 * `USERNAME_INVALID` The provided username is not valid.
