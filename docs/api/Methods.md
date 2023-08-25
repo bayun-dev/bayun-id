@@ -9,9 +9,10 @@
 | [`/login/availability`](#/login/availability) | Проверяет доступность входа для пользователя по имени пользователя. |
 
 ### Регистрация
-| Name                                            | Description                                                                                     |
-|:------------------------------------------------|:------------------------------------------------------------------------------------------------|
-| [`/signup/availability`](#/signup/availability) | Проверяет доступность регистрации для имени пользователя.                                       |
+| Name                                            | Description                                                                         |
+|:------------------------------------------------|:------------------------------------------------------------------------------------|
+| [`/signup`](#/signup)                           | Регистрирует новый аккаунт.                                                         |
+| [`/signup/availability`](#/signup/availability) | Проверяет доступность регистрации для имени пользователя.                           |
 
 ## Подробное описание методов
 
@@ -63,6 +64,39 @@ Content-Type: application/x-www-form-urlencoded
 #### Коды ошибок
 В ходе выполнения могут произойти общие ошибки, а так же:  
 * `USERNAME_INVALID` The provided username is not valid.
+---
+
+### `/signup`
+> Регистрирует новый аккаунт.
+
+#### Запрос
+```http request
+POST /api/signup
+Content-Type: application/x-www-form-urlencoded
+```
+
+#### Параметры
+* `username` `string` New account username
+* `fistName` `string` New account first name
+* `lastName` `string` New account last name
+* `dateOfBirth` `string` New account date of birth
+* `gender` `string` New account gender
+* `password` `string` New account password
+* `email` `string` `optional` New account email
+
+#### Результат
+Метод возвращает объект, несодержащий полей.
+
+#### Коды ошибок
+В ходе выполнения могут произойти общие ошибки, а так же:
+* `DATE_OF_BIRTH_INVALID` The provided date of birth is not valid.   
+* `EMAIL_INVALID` The provided email is not valid.           
+* `FIRSTNAME_INVALID` The provided first name is not valid.      
+* `GENDER_INVALID` The provided gender is not valid.          
+* `LASTNAME_INVALID` The provided last name is not valid.       
+* `PASSWORD_INVALID` The provided password is not valid.        
+* `USERNAME_INVALID` The provided username is not valid.
+* `USERNAME_OCCUPIED` The provided username is already occupied.
 ---
 
 ### `/signup/availability`
