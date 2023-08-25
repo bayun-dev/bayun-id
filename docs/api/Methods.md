@@ -5,10 +5,33 @@
 ### Авторизация
 | Name                                          | Description                                                         |
 |:----------------------------------------------|:--------------------------------------------------------------------|
+| [`/login`](#/login)                           | Авторизирует пользователя по имени пользователя и паролю.           |
 | [`/login/availability`](#/login/availability) | Проверяет доступность входа для пользователя по имени пользователя. |
 
 ## Подробное описание методов
 
+### `/login`
+> Авторизирует пользователя по имени пользователя и паролю.
+
+#### Запрос
+```http request
+POST /api/login
+Content-Type: application/x-www-form-urlencoded
+```
+
+#### Параметры
+* `username` `string` Username
+* `password` `string` Password
+
+#### Результат
+Метод возвращает объект, содержащий единственное поле:
+* `redirectUrl` `string` url, по которому клиент ДОЛЖЕН перейти для продолжения авторизации.
+
+#### Коды ошибок
+В ходе выполнения могут произойти общие ошибки, а так же:
+* `USERNAME_INVALID` The provided username is not valid.
+* `PASSWORD_INVALID` The provided password is not valid.
+---
 
 ### `/login/availability`
 > Проверяет доступность входа для пользователя по имени пользователя.
@@ -34,4 +57,4 @@ Content-Type: application/x-www-form-urlencoded
 
 #### Коды ошибок
 В ходе выполнения могут произойти общие ошибки, а так же:  
-* `USERNAME_INVALID` The provided username is not invalid.
+* `USERNAME_INVALID` The provided username is not valid.
