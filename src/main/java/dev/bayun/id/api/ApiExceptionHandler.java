@@ -3,7 +3,6 @@ package dev.bayun.id.api;
 import dev.bayun.id.api.schema.Error;
 import dev.bayun.id.api.schema.Errors;
 import dev.bayun.id.api.schema.response.ErrorResponse;
-import dev.bayun.id.core.exception.UsernameOccupiedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,13 +31,5 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ErrorResponse(errors));
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(UsernameOccupiedException.class)
-    public ResponseEntity<ErrorResponse> usernameUnavailableExceptionHandle(UsernameOccupiedException exception) {
-        return ResponseEntity.badRequest()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorResponse(Errors.USERNAME_OCCUPIED));
     }
 }

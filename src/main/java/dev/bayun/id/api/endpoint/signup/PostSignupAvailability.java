@@ -40,5 +40,4 @@ public class PostSignupAvailability {
 
         return new PostSignupAvailabilityResponse(true);
     }
-
 }

@@ -1,6 +1,8 @@
 package dev.bayun.id.api.endpoint.signup;
 
+import dev.bayun.id.api.schema.Errors;
 import dev.bayun.id.api.schema.request.PostSignupRequest;
+import dev.bayun.id.api.schema.response.ErrorResponse;
 import dev.bayun.id.api.schema.response.PostSignupResponse;
 import dev.bayun.id.core.entity.account.Person;
 import dev.bayun.id.core.exception.UsernameOccupiedException;
@@ -9,9 +11,11 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,5 +48,13 @@ public class PostSignup {
         person.setDateOfBirth(body.getDateOfBirth());
         person.setGender(Person.Gender.fromValue(body.getGender()));
         accountService.create(body.getUsername(), person, body.getPassword(), body.getEmail());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UsernameOccupiedException.class)
+    public ResponseEntity<ErrorResponse> usernameOccupiedExceptionHandle(UsernameOccupiedException exception) {
+        return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ErrorResponse(Errors.USERNAME_OCCUPIED));
     }
 }
