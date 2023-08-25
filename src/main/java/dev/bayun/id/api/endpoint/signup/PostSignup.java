@@ -33,7 +33,7 @@ public class PostSignup {
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public void handle(@Validated PostSignupRequest body, BindingResult bindingResult) throws BindException {
+    public PostSignupResponse handle(@Validated PostSignupRequest body, BindingResult bindingResult) throws BindException {
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
         }
@@ -48,6 +48,8 @@ public class PostSignup {
         person.setDateOfBirth(body.getDateOfBirth());
         person.setGender(Person.Gender.fromValue(body.getGender()));
         accountService.create(body.getUsername(), person, body.getPassword(), body.getEmail());
+
+        return new PostSignupResponse();
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
