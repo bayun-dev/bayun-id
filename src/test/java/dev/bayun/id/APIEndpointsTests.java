@@ -9,7 +9,6 @@ import dev.bayun.id.core.entity.account.Account;
 import dev.bayun.id.core.entity.account.Authority;
 import dev.bayun.id.core.entity.account.Person;
 import dev.bayun.id.core.repository.AccountRepository;
-import dev.bayun.id.core.service.AccountService;
 import dev.bayun.id.util.TestAccountBuilder;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,9 +37,6 @@ public class APIEndpointsTests {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private AccountService accountService;
 
     @Autowired
     private AccountRepository accountRepository;
