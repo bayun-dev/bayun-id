@@ -36,13 +36,13 @@ public class GetAccountsById {
         Account account;
         try {
             if (id.equalsIgnoreCase("me")) {
-                String username = (String) authentication.getPrincipal();
+                String username = authentication.getName();
                 account = accountService.loadUserByUsername(username);
             } else {
                 account = accountService.loadUserById(UUID.fromString(id));
             }
         } catch (AccountNotFoundException | UsernameNotFoundException | IllegalArgumentException exception) {
-            throw new AccountRegistrationException(Errors.ACCOUNT_NOT_FOUND_CODE);
+            throw new AccountNotFoundException(Errors.ACCOUNT_NOT_FOUND_CODE);
         }
 
         return new GetAccountsByIdResponse(account);

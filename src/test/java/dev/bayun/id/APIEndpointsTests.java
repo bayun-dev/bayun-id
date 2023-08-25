@@ -1,6 +1,7 @@
 package dev.bayun.id;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.bayun.id.api.schema.Errors;
 import dev.bayun.id.api.schema.response.PostLoginAvailabilityResponse;
 import dev.bayun.id.api.schema.response.PostLoginResponse;
 import dev.bayun.id.api.schema.response.PostSignupAvailabilityResponse;
@@ -11,6 +12,7 @@ import dev.bayun.id.core.entity.account.Person;
 import dev.bayun.id.core.repository.AccountRepository;
 import dev.bayun.id.util.TestAccountBuilder;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -21,15 +23,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.*;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -90,7 +95,39 @@ public class APIEndpointsTests {
     }
 
     @Test
-    @WithMockUser(value = "normal")
+    @WithUserDetails(value = "normal", userDetailsServiceBeanName = "defaultAccountService")
+    public void test_api_getAccountsById_ok() throws Exception {
+        Account account = accounts.get("normal");
+
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/api/accounts/"+account.getId())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        String expectedJsonResponse = objectMapper.writeValueAsString(account);
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonResponse));
+
+        log.info(expectedJsonResponse);
+    }
+
+    @Test
+    @WithUserDetails(value = "normal", userDetailsServiceBeanName = "defaultAccountService")
+    public void test_api_getAccountsById_notFound() throws Exception {
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/api/accounts/"+UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(containsString(Errors.ACCOUNT_NOT_FOUND_CODE)));
+    }
+
+    @Test
+    @WithUserDetails(value = "normal", userDetailsServiceBeanName = "defaultAccountService")
     public void test_api_getAccountsById_me_ok() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/api/accounts/me")
