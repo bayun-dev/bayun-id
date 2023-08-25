@@ -13,6 +13,10 @@ public class Errors {
 
     public static final Error ACCOUNT_DELETED = new Error(ACCOUNT_DELETED_CODE, "Account deleted.");
 
+    public static final String ACCOUNT_NOT_FOUND_CODE = "ACCOUNT_NOT_FOUND";
+
+    public static final Error ACCOUNT_NOT_FOUND = new Error(ACCOUNT_NOT_FOUND_CODE, "Account not found.");
+
     public static final String CREDENTIALS_NOT_FOUND_CODE = "CREDENTIALS_NOT_FOUND";
 
     public static final Error CREDENTIALS_NOT_FOUND = new Error(CREDENTIALS_NOT_FOUND_CODE, "The provided credentials is bad");

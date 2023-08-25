@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -86,6 +87,21 @@ public class APIEndpointsTests {
 
         accounts.put(normal.getUsername(), normal);
         accounts.put(unregistered.getUsername(), unregistered);
+    }
+
+    @Test
+    @WithMockUser(value = "normal")
+    public void test_api_getAccountsById_me_ok() throws Exception {
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/api/accounts/me")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        String expectedJsonResponse = objectMapper.writeValueAsString(accounts.get("normal"));
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonResponse));
     }
 
     @Test
