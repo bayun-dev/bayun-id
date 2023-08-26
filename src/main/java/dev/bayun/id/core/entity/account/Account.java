@@ -1,5 +1,6 @@
 package dev.bayun.id.core.entity.account;
 
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +12,9 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "accounts")
+@JsonIncludeProperties({
+        "id", "username", "person", "contact", "secret", "details", "deactivation"
+})
 public class Account implements UserDetails, Serializable {
 
     @Id

@@ -1,28 +1,22 @@
 package dev.bayun.id.core.entity.account;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
 @Embeddable
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Deactivation implements Serializable {
 
     private boolean deactivated;
 
     @Enumerated(EnumType.STRING)
     private Deactivation.Reason reason;
-
-    private String reasonMessage;
 
     private Long date;
 
