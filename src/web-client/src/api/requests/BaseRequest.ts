@@ -1,8 +1,9 @@
 import axios, {AxiosRequestConfig, AxiosResponse} from "axios";
 import BaseResponse from "../responses/BaseResponse";
-import RequestWithCsrf from "./RequestWithCsrf";
 
 export enum RequestMethod {
+    DELETE,
+    PATCH,
     POST,
     GET
 }
@@ -26,13 +27,16 @@ abstract class BaseRequest<R = BaseResponse, D = any> {
             case RequestMethod.GET:
                 return await axios.get<R>(this.url, this.config)
             case RequestMethod.POST:
-                console.log(getCsrf())
                 return await axios.post<R, AxiosResponse<R>>(this.url, { ...this.data, ...getCsrf()}, this.config)
+            case RequestMethod.PATCH:
+                return await axios.patch<R, AxiosResponse<R>>(this.url, { ...this.data, ...getCsrf()}, this.config)
+            case RequestMethod.DELETE:
+                return await axios.delete<R, AxiosResponse<R>>(this.url, this.config)
         }
     }
 }
 
-const getCsrf = () => {
+export const getCsrf = () => {
     return { _csrf: document.querySelector<HTMLMetaElement>('meta[name="_csrf"]')?.content}
 }
 

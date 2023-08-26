@@ -4,7 +4,7 @@
 <!--    <link rel="icon" type="image/svg+xml" href="/src/assert/vite.svg" />-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="/src/index.css"/>
-    <title>Bayun ID</title>
+    <title>Account</title>
     <meta th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:content="${_csrf.token}"/>
 </head>
 <body class='min-h-full bg-white'>
@@ -14,7 +14,7 @@
                 <span class="text-xl text-gray-400">to use <span class="text-blue-400">bayun</span> services, please enable JavaScript</span>
             </div>
         </noscript>
-        <main id="page" class="min-h-full"></main>
+        <main id="p-index" class="min-h-full"></main>
     </div>
     <script type="module" src="/src/index.tsx"></script>
 </body>

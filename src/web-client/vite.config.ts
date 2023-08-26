@@ -27,7 +27,8 @@ export default defineConfig({
       '^\/signup(?!\.html)': {
         target: 'http://localhost:5173',
         rewrite: path => 'signup.html'
-      }
+      },
+
     }
   }
 })
