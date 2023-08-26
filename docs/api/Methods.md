@@ -3,10 +3,11 @@
 ## Список доступных методов
 
 ### Действия с аккаунтами
-| Name                                        | Description                                        |
-|:--------------------------------------------|:---------------------------------------------------|
-| [GET `/accounts/{id}`](#get-accountsid)     | Отдает информацию об аккаунте по идентификатору.   |
-| [PATCH `/accounts/{id}`](#patch-accountsid) | Изменяет информацию об аккаунте по идентификатору. |
+| Name                                          | Description                                           |
+|:----------------------------------------------|:------------------------------------------------------|
+| [GET `/accounts/{id}`](#get-accountsid)       | Отдает информацию об аккаунте по идентификатору.      |
+| [PATCH `/accounts/{id}`](#patch-accountsid)   | Изменяет информацию об аккаунте по идентификатору.    |
+| [DELETE `/accounts/{id}`](#delete-accountsid) | Удаляет всю информацию об аккаунте по идентификатору. |
 
 ### Авторизация
 | Name                                        | Description                                                         |
@@ -76,6 +77,26 @@ Accept: application/json
 * `GENDER_INVALID` The provided gender is not valid.
 * `LASTNAME_INVALID` The provided last name is not valid.
 * `PASSWORD_INVALID` The provided password is not valid.
+---
+
+
+### DELETE `/accounts/{id}`
+> Удаляет всю информацию об аккаунте по идентификатору.
+>
+> Для удаления информации об авторизированном аккаунте можно использовать строковый литерал `me` вместо идентификатора аккаунта.
+
+#### Запрос
+```http request
+DELETE /api/accounts/{id}
+Accept: application/json
+```
+
+#### Результат
+Метод возвращает объект, не содержащий полей.
+
+#### Коды ошибок
+В ходе выполнения могут произойти общие ошибки, а так же:
+* `ACCOUNT_NOT_FOUND` Account not found.
 ---
 
 ### `/login`

@@ -95,6 +95,21 @@ public class APIEndpointsTests {
 
     @Test
     @WithUserDetails(value = "normal", userDetailsServiceBeanName = "defaultAccountService")
+    public void test_api_deleteAccountsById_me_ok() throws Exception {
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/api/accounts/me")
+                .accept(MediaType.APPLICATION_JSON);
+
+        String expectedJsonResponse = objectMapper.writeValueAsString(new DeleteAccountsByIdResponse());
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonResponse));
+    }
+
+    @Test
+    @WithUserDetails(value = "normal", userDetailsServiceBeanName = "defaultAccountService")
     public void test_api_getAccountsById_ok() throws Exception {
         Account account = accounts.get("normal");
 
