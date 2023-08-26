@@ -2,10 +2,7 @@ package dev.bayun.id;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.bayun.id.api.schema.Errors;
-import dev.bayun.id.api.schema.response.PostLoginAvailabilityResponse;
-import dev.bayun.id.api.schema.response.PostLoginResponse;
-import dev.bayun.id.api.schema.response.PostSignupAvailabilityResponse;
-import dev.bayun.id.api.schema.response.PostSignupResponse;
+import dev.bayun.id.api.schema.response.*;
 import dev.bayun.id.core.entity.account.Account;
 import dev.bayun.id.core.entity.account.Authority;
 import dev.bayun.id.core.entity.account.Person;
@@ -13,6 +10,8 @@ import dev.bayun.id.core.repository.AccountRepository;
 import dev.bayun.id.util.TestAccountBuilder;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import lombok.extern.slf4j.Slf4j;
+import org.hamcrest.Matcher;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -22,11 +21,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.testcontainers.shaded.org.hamcrest.core.IsNot;
 
 import java.util.*;
 
@@ -175,6 +174,32 @@ public class APIEndpointsTests {
                 .andExpect(header().exists(HttpHeaders.SET_COOKIE))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(expectedJsonResponse));
+    }
+
+    @Test
+    @WithUserDetails(value = "normal", userDetailsServiceBeanName = "defaultAccountService")
+    public void test_api_patchAccountsById_me_ok() throws Exception {
+        Account normal = accounts.get("normal");
+
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .patch("/api/accounts/me").with(csrf())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("firstName", "NewFirstname")
+                .param("lastName", "NewLastName")
+                .param("dateOfBirth", "02.02.2000")
+                .param("gender", "male")
+                .param("email", "newmail@example.com")
+                .param("password", "new-password");
+
+        String expectedJsonResponse = objectMapper.writeValueAsString(new PatchAccountsByIdResponse(true));
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonResponse));
+
+        Assertions.assertNotEquals(normal, accountRepository.findByUsername("normal").orElseThrow());
     }
 
     @Test

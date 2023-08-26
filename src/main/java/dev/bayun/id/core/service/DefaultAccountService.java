@@ -3,6 +3,7 @@ package dev.bayun.id.core.service;
 import dev.bayun.id.core.entity.account.*;
 import dev.bayun.id.core.exception.AccountNotFoundException;
 import dev.bayun.id.core.exception.AccountRegistrationException;
+import dev.bayun.id.core.exception.AccountUpdateException;
 import dev.bayun.id.core.modal.AccountCreateToken;
 import dev.bayun.id.core.modal.AccountUpdateToken;
 import dev.bayun.id.core.repository.AccountRepository;
@@ -124,34 +125,38 @@ public class DefaultAccountService implements AccountService {
         Assert.notNull(id, "The id must not be null");
         Assert.notNull(id, "The token must not be null");
 
-        Account account = loadUserById(id);
+        try {
+            Account account = loadUserById(id);
 
-        Person person = account.getPerson();
-        if (token.getFirstName() != null) {
-            person.setFirstName(token.getFirstName());
-        }
-        if (token.getLastName() != null) {
-            person.setLastName(token.getLastName());
-        }
-        if (token.getDateOfBirth() != null) {
-            person.setDateOfBirth(token.getDateOfBirth());
-        }
-        if (token.getGender() != null) {
-            person.setGender(Person.Gender.fromValue(token.getGender()));
-        }
+            Person person = account.getPerson();
+            if (token.getFirstName() != null) {
+                person.setFirstName(token.getFirstName());
+            }
+            if (token.getLastName() != null) {
+                person.setLastName(token.getLastName());
+            }
+            if (token.getDateOfBirth() != null) {
+                person.setDateOfBirth(token.getDateOfBirth());
+            }
+            if (token.getGender() != null) {
+                person.setGender(Person.Gender.fromValue(token.getGender()));
+            }
 
-        Contact contact = account.getContact();
-        if (token.getEmail() != null) {
-            contact.setEmail(token.getEmail());
-            contact.setEmailConfirmed(false);
-        }
+            Contact contact = account.getContact();
+            if (token.getEmail() != null) {
+                contact.setEmail(token.getEmail());
+                contact.setEmailConfirmed(false);
+            }
 
-        Secret secret = account.getSecret();
-        if (token.getPassword() != null) {
-            secret.setHash(passwordEncoder.encode(token.getPassword()));
-            secret.setLastModifiedDate(System.currentTimeMillis());
-        }
+            Secret secret = account.getSecret();
+            if (token.getPassword() != null) {
+                secret.setHash(passwordEncoder.encode(token.getPassword()));
+                secret.setLastModifiedDate(System.currentTimeMillis());
+            }
 
-        return accountRepository.save(account);
+            return accountRepository.save(account);
+        } catch (Exception e) {
+            throw new AccountUpdateException(e);
+        }
     }
 }

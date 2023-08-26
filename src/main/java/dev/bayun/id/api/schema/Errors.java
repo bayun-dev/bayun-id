@@ -63,7 +63,7 @@ public class Errors {
         }
 
         try {
-            Field errorField = Error.class.getField(code);
+            Field errorField = Errors.class.getField(code);
             return (Error) errorField.get(null);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException(e);

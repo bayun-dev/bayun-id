@@ -3,9 +3,10 @@
 ## Список доступных методов
 
 ### Действия с аккаунтами
-| Name                                    | Description                        |
-|:----------------------------------------|:-----------------------------------|
-| [GET `/accounts/{id}`](#get-accountsid) | Отдает информацию об аккаунте по идентификатору. |
+| Name                                        | Description                                        |
+|:--------------------------------------------|:---------------------------------------------------|
+| [GET `/accounts/{id}`](#get-accountsid)     | Отдает информацию об аккаунте по идентификатору.   |
+| [PATCH `/accounts/{id}`](#patch-accountsid) | Изменяет информацию об аккаунте по идентификатору. |
 
 ### Авторизация
 | Name                                        | Description                                                         |
@@ -28,7 +29,7 @@
 
 #### Запрос
 ```http request
-POST /api/accounts/{id}
+GET /api/accounts/{id}
 Accept: application/json
 ```
 
@@ -38,6 +39,43 @@ Accept: application/json
 #### Коды ошибок
 В ходе выполнения могут произойти общие ошибки, а так же:
 * `ACCOUNT_NOT_FOUND` Account not found.
+---
+
+### PATCH `/accounts/{id}`
+> Изменяет информацию об аккаунте по идентификатору.
+>
+> Для изменения информации об авторизированном аккаунте можно использовать строковый литерал `me` вместо идентификатора аккаунта.
+
+#### Запрос
+```http request
+PATCH /api/accounts/{id}
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+```
+
+#### Параметры
+* `fistName` `string` `optional` New first name
+* `lastName` `string` `optional` New last name
+* `dateOfBirth` `string` `optional` New date of birth
+* `gender` `string` `optional` New gender
+* `password` `string` `optional` New password
+* `email` `string` `optional` New email
+
+#### Результат
+Метод возвращает объект, содержащий единственное поле:
+* `changed` `boolean` информация об изменении аккаунта.
+  * `true` аккаунт изменен.
+  * `false` ни одно из полей не сохранено.
+
+#### Коды ошибок
+В ходе выполнения могут произойти общие ошибки, а так же:
+* `ACCOUNT_NOT_FOUND` Account not found.
+* `DATE_OF_BIRTH_INVALID` The provided date of birth is not valid.
+* `EMAIL_INVALID` The provided email is not valid.
+* `FIRSTNAME_INVALID` The provided first name is not valid.
+* `GENDER_INVALID` The provided gender is not valid.
+* `LASTNAME_INVALID` The provided last name is not valid.
+* `PASSWORD_INVALID` The provided password is not valid.
 ---
 
 ### `/login`
