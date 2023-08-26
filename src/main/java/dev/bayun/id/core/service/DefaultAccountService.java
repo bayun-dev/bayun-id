@@ -10,6 +10,7 @@ import dev.bayun.id.core.repository.AccountRepository;
 import dev.bayun.id.core.util.converter.UUIDGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -82,6 +83,14 @@ public class DefaultAccountService implements AccountService {
         Assert.notNull(id, "The id must not be null");
 
         Account account = loadUserById(id);
+
+        account.setPerson(null);
+        account.setContact(null);
+        account.setSecret(null);
+
+        Set<Authority> authorities = new HashSet<>();
+        authorities.add(Authority.ROLE_DELETED);
+        account.setAuthorities(authorities);
 
         Deactivation deactivation = account.getDeactivation();
         deactivation.setDeactivated(true);

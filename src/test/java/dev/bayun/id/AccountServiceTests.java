@@ -12,12 +12,15 @@ import dev.bayun.id.core.service.AccountService;
 import dev.bayun.id.core.service.DefaultAccountService;
 import dev.bayun.id.util.TestAccountBuilder;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,6 +28,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 @DataJpaTest
 @Import({PasswordEncoderConfiguration.class, DefaultAccountService.class})
 @AutoConfigureEmbeddedDatabase(type = AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES)
@@ -82,12 +86,23 @@ public class AccountServiceTests {
     }
 
     @Test
-    public void test_delete() {
+    public void test_delete() throws JsonProcessingException {
         Account account = accountRepository.findByUsername("normal").orElseThrow();
         Account deleted = accountService.delete(account.getId());
 
+        assertNull(deleted.getPerson());
+        assertNull(deleted.getContact());
+        assertNull(deleted.getSecret());
+        for (Authority authority : deleted.getAuthorities()) {
+            assertEquals(Authority.ROLE_DELETED, authority);
+        }
         assertTrue(deleted.getDeactivation().isDeactivated());
         assertEquals(Deactivation.Reason.DELETED, deleted.getDeactivation().getReason());
+        assertNotNull(deleted.getDeactivation().getDate());
+        assertNotEquals(0, deleted.getDeactivation().getDate());
+
+        log.info(new ObjectMapper().writeValueAsString(deleted));
+        log.info(deleted.toString());
     }
 
     @Test

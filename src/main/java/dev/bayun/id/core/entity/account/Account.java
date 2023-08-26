@@ -1,5 +1,7 @@
 package dev.bayun.id.core.entity.account;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,9 +14,7 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "accounts")
-@JsonIncludeProperties({
-        "id", "username", "person", "contact", "secret", "details", "deactivation"
-})
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Account implements UserDetails, Serializable {
 
     @Id
@@ -44,6 +44,7 @@ public class Account implements UserDetails, Serializable {
     })
     private Secret secret;
 
+    @JsonIgnore
     @ElementCollection(targetClass = Authority.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "account_authorities", joinColumns = @JoinColumn(name = "account_id"))
     @Column(name = "authority")
@@ -66,16 +67,19 @@ public class Account implements UserDetails, Serializable {
     private Deactivation deactivation;
 
     @Override
+    @JsonIgnore
     public String getPassword() {
         return secret.getHash();
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         if (deactivation.isDeactivated()) {
             return !deactivation.getReason().equals(Deactivation.Reason.BLOCKED);
@@ -85,11 +89,13 @@ public class Account implements UserDetails, Serializable {
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         if (deactivation.isDeactivated()) {
             return !deactivation.getReason().equals(Deactivation.Reason.DELETED);
@@ -97,5 +103,4 @@ public class Account implements UserDetails, Serializable {
             return true;
         }
     }
-
 }

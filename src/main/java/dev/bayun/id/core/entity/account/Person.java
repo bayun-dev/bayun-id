@@ -1,6 +1,7 @@
 package dev.bayun.id.core.entity.account;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 
 @Data
 @Embeddable
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Person implements Serializable {
 
     private String firstName;
