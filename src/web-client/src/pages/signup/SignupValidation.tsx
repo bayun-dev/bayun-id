@@ -85,7 +85,7 @@ export const validateDateOfBirth = (dateOfBirth: Date): ValidationResponse => {
 }
 
 export const validateGender = (gender: string): ValidationResponse => {
-    if (!(gender === 'male' || gender === 'female')) {
+    if (!(gender.toLowerCase() === 'male' || gender.toLowerCase() === 'female')) {
         return { error: 'invalid' }
     }
 

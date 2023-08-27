@@ -1,18 +1,20 @@
-import logo from "../../assets/logo_64x64.png";
-import {SvgHome, SvgIdentification, SvgShieldCheck} from "../../component/svg";
+import {useOutletContext} from "react-router";
+import {AccountPageContextType} from "./AccountPage";
 
 const AccountHomePage = () => {
-    return <>
-        <div>
-            <div className='h-14 w-full bg-white mb-4 pl-4 rounded-l-lg'>
-                <a className='flex h-full items-center gap-2 font-logo text-3xl' href='/'>
-                    <img className='w-8 h-8' src={logo} alt=''/>
-                    <span>ID</span>
-                </a>
-            </div>
-            <div className='flex flex-col bg-white shadow rounded-lg py-2'>
-            </div>
 
+    const context = useOutletContext<AccountPageContextType>()
+
+    return <>
+        <div className='p-4 gap-x-4 gap-y-8 border border-gray-200 shadow-sm rounded-lg'>
+            <div>
+                <div>
+                    <span className='font-semibold'>{context.account.person?.firstName} {context.account.person?.lastName}</span>
+                </div>
+                <div className=''>
+                    <span className='text-gray-500'>@{context.account.username}</span>
+                </div>
+            </div>
         </div>
     </>
 }
