@@ -12,37 +12,37 @@ import lombok.ToString;
 public class PatchAccountsByIdRequest extends AccountUpdateToken {
 
     @Override
-    @FirstName
+    @FirstName(required = false)
     public String getFirstName() {
         return super.getFirstName();
     }
 
     @Override
-    @LastName
+    @LastName(required = false)
     public String getLastName() {
         return super.getLastName();
     }
 
     @Override
-    @DateOfBirth
+    @DateOfBirth(required = false)
     public String getDateOfBirth() {
         return super.getDateOfBirth();
     }
 
     @Override
-    @Gender
+    @Gender(required = false)
     public String getGender() {
         return super.getGender();
     }
 
     @Override
-    @Email
+    @Email(required = false)
     public String getEmail() {
         return super.getEmail();
     }
 
     @Override
-    @Password
+    @Password(required = false)
     public String getPassword() {
         return super.getPassword();
     }

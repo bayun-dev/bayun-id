@@ -218,6 +218,26 @@ public class APIEndpointsTests {
     }
 
     @Test
+    @WithUserDetails(value = "normal", userDetailsServiceBeanName = "defaultAccountService")
+    public void test_api_patchAccountsById_me_nonParams_ok() throws Exception {
+        Account normal = accounts.get("normal");
+
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .patch("/api/accounts/me").with(csrf())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        String expectedJsonResponse = objectMapper.writeValueAsString(new PatchAccountsByIdResponse(true));
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonResponse));
+
+        Assertions.assertEquals(normal, accountRepository.findByUsername("normal").orElseThrow());
+    }
+
+    @Test
     public void test_api_signupAvailability_ok() throws Exception {
         Account account = accounts.get("unregistered");
 
