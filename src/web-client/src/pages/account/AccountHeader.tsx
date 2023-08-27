@@ -10,6 +10,12 @@ const AccountHeader = () => {
             return 'Personal info'
         } else if (matches.some(value => value.id === 'account.security')) {
             return 'Security'
+        } else if (matches.some(value => value.id === 'account.email.change')) {
+            return 'Your email'
+        } else if (matches.some(value => value.id === 'account.password.change')) {
+            return 'Your password'
+        } else if (matches.some(value => value.id === 'account.delete')) {
+            return 'Account deletion'
         }
     }
 
@@ -23,7 +29,7 @@ const AccountHeader = () => {
                     </a>
                 </div>
                 <div className='flex items-center col-span-2 h-full pl-4'>
-                    <span className='text-xl font-semibold'>{getHeader()}</span>
+                    <span className='text-xl font-medium'>{getHeader()}</span>
                 </div>
             </div>
 

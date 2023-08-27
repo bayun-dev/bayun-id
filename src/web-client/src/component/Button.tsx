@@ -98,7 +98,7 @@ const Button = (props: PropsWithChildren<ButtonProps>) => {
     const bBgClasses = getBgColor()
     const bTextClasses = [getTextSize(), getTextColor(), 'font-medium text-center'].join(' ')
     const bCommonClasses = [getPadding(), 'w-full'].join(' ')
-    const bDisabledClasses = props.disabled ? 'cursor-not-allowed' : ''
+    const bDisabledClasses = props.disabled ? 'cursor-not-allowed opacity-50' : ''
     const bClasses = [bCommonClasses, bDisabledClasses, bBorderClasses, bBgClasses, bTextClasses].join(' ')
 
     return <>

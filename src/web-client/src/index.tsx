@@ -6,13 +6,18 @@ import AccountHomePage from "./pages/account/AccountHomePage";
 import AccountPersonalPage from "./pages/account/AccountPersonalPage";
 import AccountSecurityPage from "./pages/account/AccountSecurityPage";
 import {createRoot} from "react-dom/client";
-import AccountHeader from "./pages/account/AccountHeader";
+import AccountEmailChangePage from "./pages/account/AccountEmailChangePage";
+import AccountPasswordChangePage from "./pages/account/AccountPasswordChangePage";
+import AccountDeletePage from "./pages/account/AccountDeletePage";
+import ErrorPage, {ErrorPageProvider} from "./pages/error/ErrorPage";
 
 const AccountPageContextLoader = () => {
     return <>
-        <LoadingProvider>
-            <Outlet/>
-        </LoadingProvider>
+        <ErrorPageProvider>
+            <LoadingProvider>
+                <Outlet/>
+            </LoadingProvider>
+        </ErrorPageProvider>
     </>
 }
 
@@ -21,6 +26,7 @@ const accountPageRouter = createBrowserRouter([
         id: 'page.root',
         path: '/',
         element: <AccountPageContextLoader/>,
+        errorElement: <ErrorPage/>,
         children: [
             {
                 id: 'account',
@@ -42,7 +48,23 @@ const accountPageRouter = createBrowserRouter([
                         id: 'account.security',
                         path: '/security',
                         element: <AccountSecurityPage/>
-                    },                ]
+                    },
+                    {
+                        id: 'account.email.change',
+                        path: '/email-change',
+                        element: <AccountEmailChangePage/>
+                    },
+                    {
+                        id: 'account.password.change',
+                        path: '/password-change',
+                        element: <AccountPasswordChangePage/>
+                    },
+                    {
+                        id: 'account.delete',
+                        path: '/delete',
+                        element: <AccountDeletePage/>
+                    }
+                ]
             },
         ],
     },

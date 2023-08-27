@@ -19,7 +19,7 @@ type NavItemProps = {
 }
 const NavItem = (props: NavItemProps) => {
 
-    const currentPageClasses = 'aria-[current=page]:bg-gray-100'
+    const currentPageClasses = 'aria-[current=page]:bg-gray-100 aria-[current=page]:pointer-events-none'
     const commonClasses = 'flex h-full items-center gap-4 p-4 hover:bg-gray-100'
     const navClasses = [commonClasses, currentPageClasses].join(' ')
 

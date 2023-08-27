@@ -112,10 +112,6 @@ const InputDate = (props: PropsWithChildren<InputDateProps>) => {
             </div>
     );
 
-    useEffect(() => {
-        console.log('props', CustomInput)
-    }, [])
-
     function getDateClasses(date: Date) {
         switch(props.color) {
             case 'blue':

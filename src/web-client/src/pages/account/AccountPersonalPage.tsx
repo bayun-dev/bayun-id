@@ -2,9 +2,9 @@ import InputText from "../../component/InputText";
 import Select from "../../component/Select";
 import InputDate from "../../component/InputDate";
 import Button from "../../component/Button";
-import {ChangeEvent, ReactNode, useState} from "react";
+import {ChangeEvent, ReactNode, useEffect, useState} from "react";
 import moment from "moment";
-import {useOutletContext} from "react-router";
+import {useNavigate, useOutletContext} from "react-router";
 import {AccountPageContextType} from "./AccountPage";
 import {validateDateOfBirth, validateFirstname, validateGender, validateLastname} from "../signup/SignupValidation";
 import {useLoading} from "../../hooks/use-loading";
@@ -15,8 +15,11 @@ import * as React from "react";
 
 const AccountPersonalPage = () => {
 
-    const loading = useLoading()
     const context = useOutletContext<AccountPageContextType>()
+    const navigate = useNavigate()
+
+    const [submitDisabled, setSubmitDisabled] = useState<boolean>(true)
+    const [changed, setChanged] = useState<boolean>(false)
 
     const [firstName, setFirstName] = useState<string>(context.account.person?.firstName!)
     const [firstNameError, setFirstNameError] = useState<string | undefined>(undefined)
@@ -64,8 +67,22 @@ const AccountPersonalPage = () => {
         setGenderError(undefined)
     }
 
+    useEffect(() => {
+        setSubmitDisabled(firstName === context.account.person?.firstName
+            && lastName === context.account.person?.lastName
+            && moment(dateOfBirth).format('DD.MM.yyyy') === context.account.person?.dateOfBirth
+            && gender === context.account.person?.gender)
+    }, [firstName, lastName, dateOfBirth, gender])
+
+    function onChanged() {
+        setChanged(true)
+        setTimeout(() => {
+            setChanged(false)
+        }, 5000)
+    }
+
     async function onSave() {
-        loading.show()
+        setSubmitDisabled(true)
 
         const validateFirstnameResult = validateFirstname(firstName)
         if (validateFirstnameResult.error) {
@@ -95,7 +112,7 @@ const AccountPersonalPage = () => {
 
         if (validateFirstnameResult.error || validateLastnameResult.error
             || validateDateOfBirthResult.error || validateGenderResult.error) {
-            loading.hide()
+            setSubmitDisabled(false)
             return
         }
 
@@ -107,10 +124,9 @@ const AccountPersonalPage = () => {
             dateOfBirth: context.account.person?.dateOfBirth === dateOfBirthFormat ? undefined : dateOfBirthFormat,
             gender: context.account.person?.gender.toLowerCase() === gender.toLowerCase() ? undefined : gender.toLowerCase(),
         })
-        console.log(request)
         request.execute().then(r => {
             if (r.status === 200) {
-
+                navigate(0)
             } else {
                 throw r
             }
@@ -130,19 +146,21 @@ const AccountPersonalPage = () => {
                         throw error
                     }
                 })
-                loading.hide()
             } else {
                 throw new Error()
             }
         }).catch(error => {
-            loading.hide()
             console.error(error)
+            setSubmitDisabled(false)
         })
-
-        loading.hide()
     }
 
     return <>
+        { changed &&
+            <div className="p-4 mb-4 text-base text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 border border-green-300 dark:border-green-300">
+                <span className="">Changes saved</span>
+            </div>
+        }
         <div className='grid grid-cols-2 p-4 gap-x-4 border border-gray-200 shadow-sm rounded-lg'>
             <InputText label='First Name' value={firstName} defaultValue={context.account.person?.firstName!}
                        onChange={onChangeFirstName} errorMessage={firstNameError}/>
@@ -150,7 +168,7 @@ const AccountPersonalPage = () => {
                        onChange={onChangeLastName} errorMessage={lastNameError}/>
             <div className='col-span-2 mb-8'>
                 { nameHelp &&
-                    <p id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">{nameHelp}</p>
+                    <div id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">{nameHelp}</div>
                 }
             </div>
             <Select label='Gender' value={gender} values={{male: 'Male', female: 'Female'}}
@@ -158,7 +176,7 @@ const AccountPersonalPage = () => {
             <InputDate label='Date of birth' dateFormat='dd.MM.yyyy'
                        selected={dateOfBirth} onChange={onChangeDateOfBirth} errorMessage={dateOfBirthError}/>
             <div className='col-span-2 mt-8'>
-                <Button type='dark' onClick={onSave}>Save</Button>
+                <Button type='dark' onClick={onSave} disabled={submitDisabled}>Save</Button>
             </div>
         </div>
     </>
