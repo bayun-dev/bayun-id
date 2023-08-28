@@ -18,7 +18,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -275,5 +277,21 @@ public class APIEndpointsTests {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(expectedJsonResponse));
+    }
+
+    @Test
+    @WithUserDetails(value = "normal", userDetailsServiceBeanName = "defaultAccountService")
+    public void test_post_api_accounts_byId_avatar() throws Exception {
+        Account normal = accounts.get("normal");
+
+        ClassPathResource resource = new ClassPathResource("avatar.jpg");
+        byte[] origin = resource.getInputStream().readAllBytes();
+
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .multipart(HttpMethod.POST, "/api/accounts/me/avatar").file("avatar", origin).with(csrf())
+                .contentType(MediaType.MULTIPART_FORM_DATA);
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk());
     }
 }

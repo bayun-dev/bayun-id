@@ -35,4 +35,4 @@ create unique index on accounts(username);
 create table if not exists account_authorities (
     account_id uuid references accounts(id) on delete cascade,
     authority varchar(16) not null
-)
+);

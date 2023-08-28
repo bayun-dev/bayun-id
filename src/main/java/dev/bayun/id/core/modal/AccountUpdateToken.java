@@ -2,6 +2,8 @@ package dev.bayun.id.core.modal;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class AccountUpdateToken {
 
@@ -16,5 +18,7 @@ public class AccountUpdateToken {
     private String email;
 
     private String password;
+
+    private UUID avatarId;
 
 }

@@ -22,6 +22,9 @@ public class Account implements UserDetails, Serializable {
 
     private String username;
 
+    @Column(name = "avatar_id")
+    private UUID avatarId;
+
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "firstName", column = @Column(name = "first_name")),

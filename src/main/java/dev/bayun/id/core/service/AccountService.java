@@ -1,6 +1,7 @@
 package dev.bayun.id.core.service;
 
 import dev.bayun.id.core.entity.account.Account;
+import dev.bayun.id.core.entity.account.Avatar;
 import dev.bayun.id.core.modal.AccountCreateToken;
 import dev.bayun.id.core.modal.AccountUpdateToken;
 import org.springframework.security.core.userdetails.UserDetailsService;

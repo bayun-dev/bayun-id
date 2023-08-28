@@ -7,6 +7,7 @@ import dev.bayun.id.core.exception.AccountUpdateException;
 import dev.bayun.id.core.modal.AccountCreateToken;
 import dev.bayun.id.core.modal.AccountUpdateToken;
 import dev.bayun.id.core.repository.AccountRepository;
+import dev.bayun.id.core.repository.AvatarRepository;
 import dev.bayun.id.core.repository.EmailUpdateTokenRepository;
 import dev.bayun.id.core.service.email.EmailContext;
 import dev.bayun.id.core.service.email.EmailService;
@@ -32,6 +33,9 @@ public class DefaultAccountService implements AccountService {
 
     @Setter
     private AccountRepository accountRepository;
+
+    @Setter
+    private AvatarRepository avatarRepository;
 
     @Setter
     private EmailService emailService;
@@ -189,6 +193,10 @@ public class DefaultAccountService implements AccountService {
             if (token.getPassword() != null) {
                 secret.setHash(passwordEncoder.encode(token.getPassword()));
                 secret.setLastModifiedDate(System.currentTimeMillis());
+            }
+
+            if (token.getAvatarId() != null) {
+                account.setAvatarId(token.getAvatarId());
             }
 
             return accountRepository.save(account);

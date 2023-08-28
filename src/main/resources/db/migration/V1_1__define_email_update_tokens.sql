@@ -1,4 +1,4 @@
-create table email_update_tokens (
+create table if not exists email_update_tokens (
     id uuid not null,
     account_id uuid unique not null,
     email varchar(320) not null,
