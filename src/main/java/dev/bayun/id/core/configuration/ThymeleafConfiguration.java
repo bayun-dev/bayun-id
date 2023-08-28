@@ -11,13 +11,31 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 public class ThymeleafConfiguration {
 
     @Bean
-    public ClassLoaderTemplateResolver templateResolver() {
+    public ClassLoaderTemplateResolver uiTemplateResolver() {
         ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-        templateResolver.setPrefix("ui/");
         templateResolver.setCacheable(false);
+        templateResolver.setCharacterEncoding("UTF-8");
+        templateResolver.setCheckExistence(true);
+        templateResolver.setName("ui");
+        templateResolver.setOrder(0);
+        templateResolver.setPrefix("ui/");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode("HTML5");
+
+        return templateResolver;
+    }
+
+    @Bean
+    public ClassLoaderTemplateResolver emailTemplateResolver() {
+        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+        templateResolver.setCacheable(false);
         templateResolver.setCharacterEncoding("UTF-8");
+        templateResolver.setCheckExistence(true);
+        templateResolver.setName("email");
+        templateResolver.setOrder(1);
+        templateResolver.setPrefix("email/");
+        templateResolver.setSuffix(".html");
+        templateResolver.setTemplateMode("HTML5");
 
         return templateResolver;
     }
@@ -25,7 +43,8 @@ public class ThymeleafConfiguration {
     @Bean
     public SpringTemplateEngine templateEngine() {
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-        templateEngine.setTemplateResolver(templateResolver());
+        templateEngine.addTemplateResolver(uiTemplateResolver());
+        templateEngine.addTemplateResolver(emailTemplateResolver());
 
         return templateEngine;
     }
