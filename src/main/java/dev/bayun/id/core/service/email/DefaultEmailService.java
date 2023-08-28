@@ -17,7 +17,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 @Slf4j
 @Service
 @Import(org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration.class)
-public class DefaultEmailService {
+public class DefaultEmailService implements EmailService {
 
     @Value("${spring.mail.username}")
     private String sender;

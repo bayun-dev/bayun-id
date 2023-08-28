@@ -25,4 +25,6 @@ public interface AccountService extends UserDetailsService {
 
     Account update(UUID id, AccountUpdateToken token);
 
+    void emailConfirm(UUID id, String tokenId);
+
 }

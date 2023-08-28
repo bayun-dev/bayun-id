@@ -7,9 +7,14 @@ import dev.bayun.id.core.exception.AccountUpdateException;
 import dev.bayun.id.core.modal.AccountCreateToken;
 import dev.bayun.id.core.modal.AccountUpdateToken;
 import dev.bayun.id.core.repository.AccountRepository;
+import dev.bayun.id.core.repository.EmailUpdateTokenRepository;
+import dev.bayun.id.core.service.email.EmailContext;
+import dev.bayun.id.core.service.email.EmailService;
 import dev.bayun.id.core.util.converter.UUIDGenerator;
+import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,14 +28,29 @@ import java.util.UUID;
 
 @Service
 @Transactional
-@AllArgsConstructor
 public class DefaultAccountService implements AccountService {
 
     @Setter
     private AccountRepository accountRepository;
 
     @Setter
+    private EmailService emailService;
+
+    @Setter
+    private EmailUpdateTokenRepository emailUpdateTokenRepository;
+
+    @Setter
     private PasswordEncoder passwordEncoder;
+
+    @Value("${server.host}")
+    private String serverHost;
+
+    public DefaultAccountService(AccountRepository accountRepository, EmailService emailService, EmailUpdateTokenRepository emailUpdateTokenRepository, PasswordEncoder passwordEncoder) {
+        this.accountRepository = accountRepository;
+        this.emailService = emailService;
+        this.emailUpdateTokenRepository = emailUpdateTokenRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public Account create(AccountCreateToken token) {
@@ -153,6 +173,14 @@ public class DefaultAccountService implements AccountService {
 
             Contact contact = account.getContact();
             if (token.getEmail() != null) {
+                EmailUpdateToken emailUpdateToken = new EmailUpdateToken();
+                emailUpdateToken.setId(UUID.randomUUID());
+                emailUpdateToken.setAccountId(account.getId());
+                emailUpdateToken.setDate(System.currentTimeMillis());
+                emailUpdateToken.setEmail(token.getEmail());
+                saveEmailUpdateToken(emailUpdateToken);
+                sendConfirmationEmail(emailUpdateToken, account.getPerson().getFirstName());
+
                 contact.setEmail(token.getEmail());
                 contact.setEmailConfirmed(false);
             }
@@ -167,5 +195,45 @@ public class DefaultAccountService implements AccountService {
         } catch (Exception e) {
             throw new AccountUpdateException(e);
         }
+    }
+
+    private void saveEmailUpdateToken(EmailUpdateToken token) {
+        emailUpdateTokenRepository.deleteAllByAccountId(token.getAccountId());
+        emailUpdateTokenRepository.save(token);
+    }
+
+    private void sendConfirmationEmail(EmailUpdateToken token, String firstName) {
+        String hiddenEmail = getHiddenEmail(token.getEmail());
+        EmailContext context = new EmailContext("Linking an email to an account", "email-confirm");
+        context.getVariables().put("link", serverHost + "/email-confirm?hash="+token.getId());
+        context.getVariables().put("firstName", firstName);
+        context.getVariables().put("email", hiddenEmail);
+        try {
+            emailService.send(token.getEmail(), context);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getHiddenEmail(String email) {
+        String[] emailParts = email.split("@");
+        Assert.state(emailParts.length == 2, "invalid email");
+        String local = emailParts[0];
+        String domain = emailParts[1];
+
+        return local.charAt(0) + (local.length() > 2 ? String.valueOf(local.charAt(1)) : "") + "***@" + domain;
+    }
+
+    @Override
+    public void emailConfirm(UUID id, String tokenId) {
+        Account account = loadUserById(id);
+        UUID emailUpdateTokenId = UUID.fromString(tokenId);
+        emailUpdateTokenRepository.findById(emailUpdateTokenId).ifPresent(token -> {
+            if (token.getAccountId().equals(account.getId())) {
+                account.getContact().setEmail(token.getEmail());
+                account.getContact().setEmailConfirmed(true);
+            }
+        });
+        emailUpdateTokenRepository.deleteAllByAccountId(account.getId());
     }
 }
