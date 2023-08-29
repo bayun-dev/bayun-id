@@ -118,8 +118,8 @@ Accept: image/png
 Метод возвращает изображение портрета.
 
 #### Коды ошибок
-В ходе выполнения могут произойти общие ошибки, а так же:
-* `AVATAR_NOT_FOUND` Avatar not found.
+В ходе выполнения могут произойти следующие ошибки:
+* `404 Not Found` Avatar not found.
 ---
 
 ### POST `/accounts/{id}/avatar`

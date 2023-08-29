@@ -17,9 +17,17 @@ public class Errors {
 
     public static final Error ACCOUNT_NOT_FOUND = new Error(ACCOUNT_NOT_FOUND_CODE, "Account not found.");
 
+    public static final String AVATAR_INVALID_CODE = "AVATAR_INVALID";
+
+    public static final Error AVATAR_INVALID = new Error(AVATAR_INVALID_CODE, "The provided avatar is not valid.");
+
+    public static final String AVATAR_NOT_FOUND_CODE = "AVATAR_NOT_FOUND";
+
+    public static final Error AVATAR_NOT_FOUND = new Error(AVATAR_NOT_FOUND_CODE, "Avatar not found.");
+
     public static final String CREDENTIALS_NOT_FOUND_CODE = "CREDENTIALS_NOT_FOUND";
 
-    public static final Error CREDENTIALS_NOT_FOUND = new Error(CREDENTIALS_NOT_FOUND_CODE, "The provided credentials is bad");
+    public static final Error CREDENTIALS_NOT_FOUND = new Error(CREDENTIALS_NOT_FOUND_CODE, "The provided credentials is bad.");
 
     public static final String DATE_OF_BIRTH_INVALID_CODE = "DATE_OF_BIRTH_INVALID";
 
