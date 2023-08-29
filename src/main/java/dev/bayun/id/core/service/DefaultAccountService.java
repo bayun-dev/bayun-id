@@ -35,7 +35,7 @@ public class DefaultAccountService implements AccountService {
     private AccountRepository accountRepository;
 
     @Setter
-    private AvatarRepository avatarRepository;
+    private AvatarService avatarService;
 
     @Setter
     private EmailService emailService;
@@ -49,11 +49,12 @@ public class DefaultAccountService implements AccountService {
     @Value("${server.host}")
     private String serverHost;
 
-    public DefaultAccountService(AccountRepository accountRepository, EmailService emailService, EmailUpdateTokenRepository emailUpdateTokenRepository, PasswordEncoder passwordEncoder) {
+    public DefaultAccountService(AccountRepository accountRepository, AvatarService avatarService, EmailService emailService, EmailUpdateTokenRepository emailUpdateTokenRepository, PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
         this.emailService = emailService;
         this.emailUpdateTokenRepository = emailUpdateTokenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.avatarService = avatarService;
     }
 
     @Override
@@ -108,6 +109,7 @@ public class DefaultAccountService implements AccountService {
 
         Account account = loadUserById(id);
 
+        account.setAvatarId("default");
         account.setPerson(null);
         account.setContact(null);
         account.setSecret(null);
@@ -195,8 +197,9 @@ public class DefaultAccountService implements AccountService {
                 secret.setLastModifiedDate(System.currentTimeMillis());
             }
 
-            if (token.getAvatarId() != null) {
-                account.setAvatarId(token.getAvatarId());
+            if (token.getAvatar() != null) {
+                Avatar avatar = avatarService.save(token.getAvatar().getBytes());
+                account.setAvatarId(avatar.getId());
             }
 
             return accountRepository.save(account);
@@ -243,5 +246,12 @@ public class DefaultAccountService implements AccountService {
             }
         });
         emailUpdateTokenRepository.deleteAllByAccountId(account.getId());
+    }
+
+    @Override
+    public void setDefaultAvatar(UUID id) {
+        Account account = loadUserById(id);
+        account.setAvatarId("default");
+        accountRepository.save(account);
     }
 }

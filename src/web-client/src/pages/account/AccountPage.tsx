@@ -46,7 +46,7 @@ const AccountPage = () => {
     return <>
         <div className='w-[750px] mx-auto'>
             <div className='mb-4'>
-                <AccountHeader/>
+                <AccountHeader account={account}/>
             </div>
             <div className='grid grid-cols-3 gap-4'>
                 <div className=''>

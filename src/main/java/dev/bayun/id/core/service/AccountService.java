@@ -28,4 +28,6 @@ public interface AccountService extends UserDetailsService {
 
     void emailConfirm(UUID id, String tokenId);
 
+    void setDefaultAvatar(UUID id);
+
 }

@@ -36,7 +36,7 @@ public class GetAvatarById {
                 produces = MediaType.IMAGE_PNG_VALUE)
     public byte[] handle(@PathVariable("id") String avatarId, @PathVariable String size) {
         try {
-            Avatar avatar = avatarService.get(UUID.fromString(avatarId));
+            Avatar avatar = avatarService.get(avatarId);
             if (avatar == null) {
                 throw new AvatarNotFoundException("with id=" +avatarId);
             }

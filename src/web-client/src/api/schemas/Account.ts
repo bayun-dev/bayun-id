@@ -1,6 +1,7 @@
 type Account = {
     id: string
     username: string
+    avatarId: string
     person?: {
         firstName: string
         lastName: string

@@ -24,7 +24,7 @@ import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
-public class PostAccountsByIdAvatar {
+public class DeleteAccountsByIdAvatar {
 
     @Setter
     private AccountService accountService;
@@ -32,10 +32,11 @@ public class PostAccountsByIdAvatar {
     @Setter
     private AvatarService avatarService;
 
-    @PostMapping(path = "/api/accounts/{id}/avatar",
-                consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public PostAccountsByIdAvatarResponse handle(@RequestParam("file") MultipartFile file, @PathVariable("id") String accountId,
-                                                 Authentication authentication) throws IOException {
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping(path = "/api/accounts/{id}/avatar")
+    public void handle(@PathVariable("id") String accountId, Authentication authentication)
+            throws IOException {
+
         Account account;
         try {
             if (accountId.equalsIgnoreCase("me")) {
@@ -48,14 +49,7 @@ public class PostAccountsByIdAvatar {
             throw new AccountNotFoundException(Errors.ACCOUNT_NOT_FOUND_CODE);
         }
 
-        Avatar avatar = avatarService.save(file.getBytes());
-
-//        AccountUpdateToken token = new AccountUpdateToken();
-//        token.setAvatarId(avatar.getId());
-//
-//        accountService.update(account.getId(), token);
-
-        return new PostAccountsByIdAvatarResponse(avatar.getId().toString());
+        accountService.setDefaultAvatar(account.getId());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

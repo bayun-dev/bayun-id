@@ -1,6 +1,7 @@
 package dev.bayun.id.core.modal;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -19,6 +20,6 @@ public class AccountUpdateToken {
 
     private String password;
 
-    private UUID avatarId;
+    private MultipartFile avatar;
 
 }

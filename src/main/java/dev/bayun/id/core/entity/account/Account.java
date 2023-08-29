@@ -5,9 +5,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,7 +25,7 @@ public class Account implements UserDetails, Serializable {
     private String username;
 
     @Column(name = "avatar_id")
-    private UUID avatarId;
+    private String avatarId;
 
     @Embedded
     @AttributeOverrides({
@@ -68,6 +70,14 @@ public class Account implements UserDetails, Serializable {
             @AttributeOverride(name = "date", column = @Column(name = "deactivation_date"))
     })
     private Deactivation deactivation;
+
+    public void setAvatarId(String avatarId) {
+        this.avatarId = Objects.requireNonNullElse(avatarId, "default");
+    }
+
+    public String getAvatarId() {
+        return Objects.requireNonNullElse(this.avatarId, "default");
+    }
 
     @Override
     @JsonIgnore

@@ -28,6 +28,7 @@ export default defineConfig({
         target: 'http://localhost:5173',
         rewrite: path => 'signup.html'
       },
+      '/avatar': 'http://localhost:8181'
 
     }
   }

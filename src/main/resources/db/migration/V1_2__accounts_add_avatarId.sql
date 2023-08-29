@@ -1,2 +1,2 @@
 alter table accounts
-add avatar_id uuid;
+add if not exists avatar_id varchar(64);

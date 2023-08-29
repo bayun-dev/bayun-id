@@ -23,7 +23,7 @@ public class AvatarRepository {
         this.root = Path.of(path);
     }
 
-    public Avatar get(UUID id) {
+    public Avatar get(String id) {
         Avatar avatar = new Avatar();
         avatar.setId(id);
 

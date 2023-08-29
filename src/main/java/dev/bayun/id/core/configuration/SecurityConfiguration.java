@@ -35,8 +35,8 @@ public class SecurityConfiguration {
         http.anonymous(AbstractHttpConfigurer::disable);
         http.securityContext(configurer -> configurer.securityContextRepository(securityContextRepository()));
 
-        http.csrf(Customizer.withDefaults());
-//        http.csrf(AbstractHttpConfigurer::disable);
+//        http.csrf(Customizer.withDefaults());
+        http.csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

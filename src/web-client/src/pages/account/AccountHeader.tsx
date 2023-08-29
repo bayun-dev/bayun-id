@@ -1,7 +1,9 @@
 import logo from "../../assets/logo_64x64.png";
 import {NavLink, useLocation, useMatches} from "react-router-dom";
+import * as React from "react";
+import Account from "../../api/schemas/Account";
 
-const AccountHeader = () => {
+const AccountHeader = (props: { account: Account }) => {
 
     const matches = useMatches();
 
@@ -28,8 +30,13 @@ const AccountHeader = () => {
                         <span>ID</span>
                     </a>
                 </div>
-                <div className='flex items-center col-span-2 h-full pl-4'>
+                <div className='flex items-center h-full pl-4'>
                     <span className='text-xl font-medium'>{getHeader()}</span>
+                </div>
+                <div className='flex justify-end items-center pr-4'>
+                    <div className='h-10 w-10 rounded-full overflow-hidden'>
+                        <img className='w-full h-full' src={`/avatar/${props.account.avatarId}/large`} alt=''/>
+                    </div>
                 </div>
             </div>
 

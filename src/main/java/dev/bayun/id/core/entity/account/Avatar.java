@@ -8,7 +8,7 @@ import java.util.UUID;
 @Data
 public class Avatar {
 
-    private UUID id;
+    private String id;
 
     private byte[] small; // 42x42
 

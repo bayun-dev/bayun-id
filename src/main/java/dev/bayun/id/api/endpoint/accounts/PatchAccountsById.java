@@ -20,6 +20,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -35,7 +37,8 @@ public class PatchAccountsById {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public PatchAccountsByIdResponse handle(@PathVariable String id, Authentication authentication,
-                            @Valid PatchAccountsByIdRequest body, BindingResult bindingResult) throws BindException {
+                        @Valid PatchAccountsByIdRequest body, BindingResult bindingResult) throws BindException {
+        //@RequestParam(name = "avatar", required = false) MultipartFile avatar
 
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
@@ -69,5 +72,11 @@ public class PatchAccountsById {
     @ExceptionHandler(AccountNotFoundException.class)
     public ResponseEntity<ErrorResponse> accountNotFoundExceptionHandle() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(Errors.ACCOUNT_NOT_FOUND));
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MultipartException.class)
+    public ErrorResponse multipartExceptionHandle(MultipartException e) {
+        return new ErrorResponse(Errors.AVATAR_INVALID);
     }
 }
