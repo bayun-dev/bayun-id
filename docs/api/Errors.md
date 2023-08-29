@@ -20,11 +20,14 @@ Content-Type: application/jsons
 }
 ```
 
-## Коды ошбок
+## Коды ошибок
 | Код                   | Описание                                   |
 |:----------------------|:-------------------------------------------|
 | ACCOUNT_BLOCKED       | Account blocked.                           |
 | ACCOUNT_DELETED       | Account deleted.                           |
+| ACCOUNT_NOT_FOUND     | Account not found.                         |
+| AVATAR_INVALID        | The provided avatar in not valid.          |
+| AVATAR_NOT_FOUND      | The provided avatar in not valid.          |
 | CREDENTIALS_NOT_FOUND | The provided credentials not found.        |
 | DATE_OF_BIRTH_INVALID | The provided date of birth is not valid.   |
 | EMAIL_INVALID         | The provided email is not valid.           |
