@@ -31,6 +31,8 @@ public class PatchAccountsById {
 
     private AccountService accountService;
 
+    private MethodsAccountsByIdHelper accountsByIdHelper;
+
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping(
             path = "/api/accounts/{id}",
@@ -38,26 +40,12 @@ public class PatchAccountsById {
     )
     public PatchAccountsByIdResponse handle(@PathVariable String id, Authentication authentication,
                         @Valid PatchAccountsByIdRequest body, BindingResult bindingResult) throws BindException {
-        //@RequestParam(name = "avatar", required = false) MultipartFile avatar
 
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
         }
-        if (id == null) {
-            throw new AccountNotFoundException("the provided account id is null");
-        }
 
-        Account account;
-        try {
-            if (id.equalsIgnoreCase("me")) {
-                String username = authentication.getName();
-                account = accountService.loadUserByUsername(username);
-            } else {
-                account = accountService.loadUserById(UUID.fromString(id));
-            }
-        } catch (AccountNotFoundException | UsernameNotFoundException | IllegalArgumentException exception) {
-            throw new AccountNotFoundException(Errors.ACCOUNT_NOT_FOUND_CODE);
-        }
+        Account account = accountsByIdHelper.getAccountByPathVariableId(id, authentication);
 
         try {
             accountService.update(account.getId(), body);
@@ -66,12 +54,6 @@ public class PatchAccountsById {
         }
 
         return new PatchAccountsByIdResponse(true);
-    }
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(AccountNotFoundException.class)
-    public ResponseEntity<ErrorResponse> accountNotFoundExceptionHandle() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(Errors.ACCOUNT_NOT_FOUND));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

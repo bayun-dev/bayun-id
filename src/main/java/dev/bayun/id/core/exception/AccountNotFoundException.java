@@ -1,20 +1,32 @@
 package dev.bayun.id.core.exception;
 
-public class AccountNotFoundException extends RuntimeException {
+import org.springframework.http.HttpHeaders;
+
+public class AccountNotFoundException extends NotFoundException {
 
     public AccountNotFoundException() {
-        super();
-    }
-
-    public AccountNotFoundException(String message) {
-        super(message);
-    }
-
-    public AccountNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+        this(HttpHeaders.EMPTY, null);
     }
 
     public AccountNotFoundException(Throwable cause) {
-        super(cause);
+        this(HttpHeaders.EMPTY, cause);
+    }
+
+    public AccountNotFoundException(HttpHeaders headers, Throwable cause) {
+        this(headers,
+                new AccountNotFoundErrorBody(BaseErrorType.ACCOUNT_NOT_FOUND.getType(),
+                        BaseErrorType.ACCOUNT_NOT_FOUND.getDescription()),
+                cause);
+    }
+
+    protected AccountNotFoundException(HttpHeaders headers, AccountNotFoundErrorBody body, Throwable cause) {
+        super(headers, body, cause);
+    }
+
+    public static class AccountNotFoundErrorBody extends NotFoundErrorBody {
+
+        protected AccountNotFoundErrorBody(String type, String description) {
+            super(type, description);
+        }
     }
 }

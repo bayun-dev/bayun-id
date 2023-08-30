@@ -29,26 +29,14 @@ public class DeleteAccountsByIdAvatar {
     @Setter
     private AccountService accountService;
 
-    @Setter
-    private AvatarService avatarService;
+    private MethodsAccountsByIdHelper accountsByIdHelper;
 
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping(path = "/api/accounts/{id}/avatar")
     public void handle(@PathVariable("id") String accountId, Authentication authentication)
             throws IOException {
 
-        Account account;
-        try {
-            if (accountId.equalsIgnoreCase("me")) {
-                String username = authentication.getName();
-                account = accountService.loadUserByUsername(username);
-            } else {
-                account = accountService.loadUserById(UUID.fromString(accountId));
-            }
-        } catch (AccountNotFoundException | UsernameNotFoundException | IllegalArgumentException exception) {
-            throw new AccountNotFoundException(Errors.ACCOUNT_NOT_FOUND_CODE);
-        }
-
+        Account account = accountsByIdHelper.getAccountByPathVariableId(accountId, authentication);
         accountService.setDefaultAvatar(account.getId());
     }
 
@@ -57,5 +45,4 @@ public class DeleteAccountsByIdAvatar {
     public ErrorResponse multipartExceptionHandle(MultipartException e) {
         return new ErrorResponse(Errors.AVATAR_INVALID);
     }
-
 }

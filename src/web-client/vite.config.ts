@@ -10,16 +10,22 @@ export default defineConfig({
       input: {
         login: './login.html',
         signup: './signup.html',
-        index: './index.html'
+        index: './index.html',
+        error: './error.html'
       }
     }
   },
   server: {
+    port: 5173,
     proxy: {
       // api proxy
       '/api': 'http://localhost:8181',
 
       // view proxy
+      '^\/error(?!\.html)': {
+        target: 'http://localhost:5173',
+        rewrite: path => 'error.html'
+      },
       '^\/login(?!\.html)': {
           target: 'http://localhost:5173',
           rewrite: path => 'login.html'

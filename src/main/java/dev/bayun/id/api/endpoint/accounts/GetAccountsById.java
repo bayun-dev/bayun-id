@@ -21,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class GetAccountsById {
 
-    private AccountService accountService;
+    private MethodsAccountsByIdHelper accountsByIdHelper;
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(
@@ -29,28 +29,8 @@ public class GetAccountsById {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public GetAccountsByIdResponse handle(@PathVariable String id, Authentication authentication) {
-        if (id == null) {
-            throw new AccountNotFoundException("the provided account id is null");
-        }
-
-        Account account;
-        try {
-            if (id.equalsIgnoreCase("me")) {
-                String username = authentication.getName();
-                account = accountService.loadUserByUsername(username);
-            } else {
-                account = accountService.loadUserById(UUID.fromString(id));
-            }
-        } catch (AccountNotFoundException | UsernameNotFoundException | IllegalArgumentException exception) {
-            throw new AccountNotFoundException(Errors.ACCOUNT_NOT_FOUND_CODE);
-        }
+        Account account = accountsByIdHelper.getAccountByPathVariableId(id, authentication);
 
         return new GetAccountsByIdResponse(account);
-    }
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(AccountNotFoundException.class)
-    public ResponseEntity<ErrorResponse> accountNotFoundExceptionHandle() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(Errors.ACCOUNT_NOT_FOUND));
     }
 }

@@ -23,36 +23,17 @@ public class DeleteAccountsById {
 
     private AccountService accountService;
 
+    private MethodsAccountsByIdHelper accountsByIdHelper;
+
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping(
             path = "/api/accounts/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeleteAccountsByIdResponse handle(@PathVariable String id, Authentication authentication) {
-        if (id == null) {
-            throw new AccountNotFoundException("the provided account id is null");
-        }
-
-        Account account;
-        try {
-            if (id.equalsIgnoreCase("me")) {
-                String username = authentication.getName();
-                account = accountService.loadUserByUsername(username);
-            } else {
-                account = accountService.loadUserById(UUID.fromString(id));
-            }
-        } catch (AccountNotFoundException | UsernameNotFoundException | IllegalArgumentException exception) {
-            throw new AccountNotFoundException(Errors.ACCOUNT_NOT_FOUND_CODE);
-        }
-
+        Account account = accountsByIdHelper.getAccountByPathVariableId(id, authentication);
         accountService.delete(account.getId());
 
         return new DeleteAccountsByIdResponse();
-    }
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(AccountNotFoundException.class)
-    public ResponseEntity<ErrorResponse> accountNotFoundExceptionHandle() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(Errors.ACCOUNT_NOT_FOUND));
     }
 }

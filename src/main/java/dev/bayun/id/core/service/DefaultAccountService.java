@@ -143,8 +143,7 @@ public class DefaultAccountService implements AccountService {
     public Account loadUserById(UUID id) {
         Assert.notNull(id, "The id must not be null");
         return accountRepository.findById(id)
-                .orElseThrow(() -> new AccountNotFoundException(
-                        "account with provided id (%s) not found".formatted(id.toString())));
+                .orElseThrow(AccountNotFoundException::new);
     }
 
     @Override
