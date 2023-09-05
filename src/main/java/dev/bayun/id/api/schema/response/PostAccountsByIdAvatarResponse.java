@@ -1,6 +1,5 @@
 package dev.bayun.id.api.schema.response;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 @Data
@@ -8,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class PostAccountsByIdAvatarResponse extends AbstractResponse {
+public class PostAccountsByIdAvatarResponse extends AbstractBaseResponse {
 
     private String avatarId;
 

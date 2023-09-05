@@ -1,19 +1,16 @@
 package dev.bayun.id.core.entity.account;
 
-import jakarta.persistence.Entity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.UUID;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Avatar {
 
     private String id;
 
-    private byte[] small; // 42x42
-
-    private byte[] medium; // 56x56
-
-    private byte[] large; // 84x84
+    private byte[] blob;
 
 }

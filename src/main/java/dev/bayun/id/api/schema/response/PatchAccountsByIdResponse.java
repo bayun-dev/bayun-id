@@ -11,7 +11,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class PatchAccountsByIdResponse extends AbstractResponse {
+public class PatchAccountsByIdResponse extends AbstractBaseResponse {
 
     private boolean changed;
 

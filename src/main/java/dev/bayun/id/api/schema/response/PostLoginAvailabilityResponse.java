@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PostLoginAvailabilityResponse extends AbstractResponse {
+public class PostLoginAvailabilityResponse extends AbstractBaseResponse {
 
     private boolean available;
 

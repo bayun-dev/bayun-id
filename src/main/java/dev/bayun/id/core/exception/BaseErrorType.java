@@ -9,8 +9,8 @@ import java.util.Map;
 
 public enum BaseErrorType {
     UNKNOWN("Unknown error occurred."),
-    BAD_REQUEST("Bad request."),
-    BAD_REQUEST_PARAMETERS("The provided request parameters is not valid."),
+    BAD_REQUEST(""),
+    BAD_REQUEST_PARAMETERS(""),
     NOT_FOUND("Not found."),
     ACCOUNT_NOT_FOUND("Account not found.");
 

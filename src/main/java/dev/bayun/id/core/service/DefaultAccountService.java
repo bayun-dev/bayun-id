@@ -1,106 +1,58 @@
 package dev.bayun.id.core.service;
 
-import dev.bayun.id.core.entity.account.*;
+import dev.bayun.id.core.entity.account.Account;
+import dev.bayun.id.core.entity.account.AccountCreateToken;
+import dev.bayun.id.core.entity.account.AccountUpdateToken;
+import dev.bayun.id.core.entity.account.Authority;
 import dev.bayun.id.core.exception.AccountNotFoundException;
-import dev.bayun.id.core.exception.AccountRegistrationException;
 import dev.bayun.id.core.exception.AccountUpdateException;
-import dev.bayun.id.core.modal.AccountCreateToken;
-import dev.bayun.id.core.modal.AccountUpdateToken;
+import dev.bayun.id.core.exception.UsernameOccupiedException;
 import dev.bayun.id.core.repository.AccountRepository;
-import dev.bayun.id.core.repository.AvatarRepository;
-import dev.bayun.id.core.repository.EmailUpdateTokenRepository;
-import dev.bayun.id.core.service.email.EmailContext;
-import dev.bayun.id.core.service.email.EmailService;
-import dev.bayun.id.core.util.converter.UUIDGenerator;
-import jakarta.mail.MessagingException;
+import dev.bayun.id.core.util.UUIDGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.parameters.P;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class DefaultAccountService implements AccountService {
 
     @Setter
     private AccountRepository accountRepository;
 
     @Setter
-    private AvatarService avatarService;
-
-    @Setter
-    private EmailService emailService;
-
-    @Setter
-    private EmailUpdateTokenRepository emailUpdateTokenRepository;
-
-    @Setter
     private PasswordEncoder passwordEncoder;
 
-    @Value("${server.host}")
-    private String serverHost;
+    public Account block(UUID id) {
+        Account account = loadUserById(id);
+        account.setBlocked(true);
 
-    public DefaultAccountService(AccountRepository accountRepository, AvatarService avatarService, EmailService emailService, EmailUpdateTokenRepository emailUpdateTokenRepository, PasswordEncoder passwordEncoder) {
-        this.accountRepository = accountRepository;
-        this.emailService = emailService;
-        this.emailUpdateTokenRepository = emailUpdateTokenRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.avatarService = avatarService;
+        return accountRepository.save(account);
     }
 
     @Override
     public Account create(AccountCreateToken token) {
-        long currentTime = System.currentTimeMillis();
+        Account account = new Account();
+        account.setAuthorities(Arrays.asList(Authority.ROLE_USER));
+        account.setAvatarId(null);
+        account.setBlocked(false);
+        account.setDeleted(false);
+        account.setEmailId(null);
+        account.setFirstName(token.getFirstName());
+        account.setId(UUIDGenerator.getV7());
+        account.setLastName(token.getLastName());
+        account.setPasswordHash(passwordEncoder.encode(token.getPassword()));
+        account.setUsername(token.getUsername());
 
-        try {
-            Account account = new Account();
-            account.setId(UUIDGenerator.getV7());
-            account.setUsername(token.getUsername());
-
-            Person person = new Person();
-            person.setFirstName(token.getFirstName());
-            person.setLastName(token.getLastName());
-            person.setDateOfBirth(token.getDateOfBirth());
-            person.setGender(Person.Gender.fromValue(token.getGender()));
-            account.setPerson(person);
-
-            Contact contact = new Contact();
-            if (token.getEmail() != null) {
-                contact.setEmail(token.getEmail());
-                contact.setEmailConfirmed(false);
-            }
-            account.setContact(contact);
-
-            Secret secret = new Secret();
-            secret.setHash(passwordEncoder.encode(token.getPassword()));
-            secret.setLastModifiedDate(currentTime);
-            account.setSecret(secret);
-
-            Details details = new Details();
-            details.setRegistrationDate(currentTime);
-            account.setDetails(details);
-
-            Deactivation deactivation = new Deactivation();
-            deactivation.setDeactivated(false);
-            account.setDeactivation(deactivation);
-
-            Set<Authority> authorities = new HashSet<>();
-            authorities.add(Authority.ROLE_USER);
-            account.setAuthorities(authorities);
-
-            return accountRepository.save(account);
-        } catch (Exception e) {
-            throw new AccountRegistrationException(e);
-        }
+        return accountRepository.save(account);
     }
 
     @Override
@@ -109,20 +61,17 @@ public class DefaultAccountService implements AccountService {
 
         Account account = loadUserById(id);
 
-        account.setAvatarId("default");
-        account.setPerson(null);
-        account.setContact(null);
-        account.setSecret(null);
+        Set<Authority> authoritiesForDeleted = new HashSet<>();
+        authoritiesForDeleted.add(Authority.ROLE_DELETED);
+        account.setAuthorities(authoritiesForDeleted);
 
-        Set<Authority> authorities = new HashSet<>();
-        authorities.add(Authority.ROLE_DELETED);
-        account.setAuthorities(authorities);
-
-        Deactivation deactivation = account.getDeactivation();
-        deactivation.setDeactivated(true);
-        deactivation.setReason(Deactivation.Reason.DELETED);
-        deactivation.setDate(System.currentTimeMillis());
-        account.setDeactivation(deactivation);
+        account.setAvatarId(null);
+        account.setBlocked(false);
+        account.setDeleted(false);
+        account.setEmailId(null);
+        account.setFirstName(null);
+        account.setLastName(null);
+        account.setPasswordHash(null);
 
         return accountRepository.save(account);
     }
@@ -154,6 +103,18 @@ public class DefaultAccountService implements AccountService {
                         "account with provided username (%s) not found".formatted(username)));
     }
 
+    // return raw password
+    public String resetPassword(UUID id) {
+        Account account = loadUserById(id);
+
+        String rawPassword = generatePassword();
+        account.setPasswordHash(passwordEncoder.encode(rawPassword));
+
+        accountRepository.save(account);
+
+        return rawPassword;
+    }
+
     @Override
     public Account update(UUID id, AccountUpdateToken token) {
         Assert.notNull(id, "The id must not be null");
@@ -162,43 +123,26 @@ public class DefaultAccountService implements AccountService {
         try {
             Account account = loadUserById(id);
 
-            Person person = account.getPerson();
+            if (token.isDropAvatar()) {
+                account.setAvatarId(null);
+            } else if (token.getAvatarId() != null) {
+                account.setAvatarId(token.getAvatarId());
+            }
+
+            if (token.getEmailId() != null) {
+                account.setEmailId(token.getEmailId());
+            }
+
             if (token.getFirstName() != null) {
-                person.setFirstName(token.getFirstName());
+                account.setFirstName(token.getFirstName());
             }
+
             if (token.getLastName() != null) {
-                person.setLastName(token.getLastName());
-            }
-            if (token.getDateOfBirth() != null) {
-                person.setDateOfBirth(token.getDateOfBirth());
-            }
-            if (token.getGender() != null) {
-                person.setGender(Person.Gender.fromValue(token.getGender()));
+                account.setLastName(token.getLastName());
             }
 
-            Contact contact = account.getContact();
-            if (token.getEmail() != null) {
-                EmailUpdateToken emailUpdateToken = new EmailUpdateToken();
-                emailUpdateToken.setId(UUID.randomUUID());
-                emailUpdateToken.setAccountId(account.getId());
-                emailUpdateToken.setDate(System.currentTimeMillis());
-                emailUpdateToken.setEmail(token.getEmail());
-                saveEmailUpdateToken(emailUpdateToken);
-                sendConfirmationEmail(emailUpdateToken, account.getPerson().getFirstName());
-
-                contact.setEmail(token.getEmail());
-                contact.setEmailConfirmed(false);
-            }
-
-            Secret secret = account.getSecret();
             if (token.getPassword() != null) {
-                secret.setHash(passwordEncoder.encode(token.getPassword()));
-                secret.setLastModifiedDate(System.currentTimeMillis());
-            }
-
-            if (token.getAvatar() != null) {
-                Avatar avatar = avatarService.save(token.getAvatar().getBytes());
-                account.setAvatarId(avatar.getId());
+                account.setPasswordHash(passwordEncoder.encode(token.getPassword()));
             }
 
             return accountRepository.save(account);
@@ -207,50 +151,16 @@ public class DefaultAccountService implements AccountService {
         }
     }
 
-    private void saveEmailUpdateToken(EmailUpdateToken token) {
-        emailUpdateTokenRepository.deleteAllByAccountId(token.getAccountId());
-        emailUpdateTokenRepository.save(token);
-    }
+    private String generatePassword() {
+        final int length = 16;
+        String alphabet = "aA0bB1cC2dD3eE4fF5gG6hH7iI8jJ9kK!lL@mM#nN$oO%pP^qQ&rR*sS(tT)uU_vV+wW-xX=yY?zZ,";
 
-    private void sendConfirmationEmail(EmailUpdateToken token, String firstName) {
-        String hiddenEmail = getHiddenEmail(token.getEmail());
-        EmailContext context = new EmailContext("Linking an email to an account", "email-confirm");
-        context.getVariables().put("link", serverHost + "/email-confirm?hash="+token.getId());
-        context.getVariables().put("firstName", firstName);
-        context.getVariables().put("email", hiddenEmail);
-        try {
-            emailService.send(token.getEmail(), context);
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
+        StringBuilder builder = new StringBuilder();
+        Random random = new Random(System.currentTimeMillis());
+        for (int i = 0; i < length; i++) {
+            builder.append(alphabet.charAt(random.nextInt(alphabet.length())));
         }
-    }
 
-    private String getHiddenEmail(String email) {
-        String[] emailParts = email.split("@");
-        Assert.state(emailParts.length == 2, "invalid email");
-        String local = emailParts[0];
-        String domain = emailParts[1];
-
-        return local.charAt(0) + (local.length() > 2 ? String.valueOf(local.charAt(1)) : "") + "***@" + domain;
-    }
-
-    @Override
-    public void emailConfirm(UUID id, String tokenId) {
-        Account account = loadUserById(id);
-        UUID emailUpdateTokenId = UUID.fromString(tokenId);
-        emailUpdateTokenRepository.findById(emailUpdateTokenId).ifPresent(token -> {
-            if (token.getAccountId().equals(account.getId())) {
-                account.getContact().setEmail(token.getEmail());
-                account.getContact().setEmailConfirmed(true);
-            }
-        });
-        emailUpdateTokenRepository.deleteAllByAccountId(account.getId());
-    }
-
-    @Override
-    public void setDefaultAvatar(UUID id) {
-        Account account = loadUserById(id);
-        account.setAvatarId("default");
-        accountRepository.save(account);
+        return builder.toString();
     }
 }

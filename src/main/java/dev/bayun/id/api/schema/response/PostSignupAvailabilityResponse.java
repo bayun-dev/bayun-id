@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class PostSignupAvailabilityResponse extends AbstractResponse {
+public class PostSignupAvailabilityResponse extends AbstractBaseResponse {
 
     private final boolean available;
 

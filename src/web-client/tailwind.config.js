@@ -7,12 +7,22 @@ export default {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      spacing: {
+        'xs': '360px',
+        'sm': '480px',
+        'md': '720px',
+        'lg': '960px',
+      },
+    },
     screens: {
-      'sm': '480px'
+      'xs': '360px',
+      'sm': '480px',
+      'md': '720px',
+      'lg': '960px',
     },
     fontFamily: {
-      'logo': ['Tilt Neon', 'cursive'],
+      'logo': ['Tourney', 'cursive'],
       'roboto': ['Roboto', 'sans-serif']
     },
     container: {

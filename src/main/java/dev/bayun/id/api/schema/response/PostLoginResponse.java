@@ -9,7 +9,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class PostLoginResponse extends AbstractResponse {
+public class PostLoginResponse extends AbstractBaseResponse {
 
     private String redirectUrl;
 

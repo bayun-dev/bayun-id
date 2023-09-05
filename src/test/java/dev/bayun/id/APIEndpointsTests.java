@@ -5,12 +5,10 @@ import dev.bayun.id.api.schema.Errors;
 import dev.bayun.id.api.schema.response.*;
 import dev.bayun.id.core.entity.account.Account;
 import dev.bayun.id.core.entity.account.Authority;
-import dev.bayun.id.core.entity.account.Person;
 import dev.bayun.id.core.repository.AccountRepository;
 import dev.bayun.id.util.TestAccountBuilder;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import lombok.extern.slf4j.Slf4j;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,7 +25,6 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.testcontainers.shaded.org.hamcrest.core.IsNot;
 
 import java.util.*;
 

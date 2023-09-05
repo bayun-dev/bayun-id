@@ -9,6 +9,11 @@ import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.AuthorizationServiceException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.web.csrf.CsrfException;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -48,8 +53,31 @@ public class BaseHandlerExceptionResolver implements HandlerExceptionResolver, O
             if (ex instanceof BindException bindException) {
                 return handleBindException(bindException, request, response, handler);
             }
-            return handleBaseErrorResponse(new UnknownException(ex), request, response, handler);
+            if (ex instanceof AccessDeniedException accessDeniedException) {
+                return handleAccessDeniedException(accessDeniedException, request, response, handler);
+            }
+            if (ex instanceof AuthenticationCredentialsNotFoundException authenticationCredentialsNotFoundException) {
+                return handleAuthenticationCredentialsNotFoundException(authenticationCredentialsNotFoundException, request, response, handler);
+            }
+            return handleBaseErrorResponse(new InternalErrorException(ex), request, response, handler);
         }
+    }
+
+    private ModelAndView handleAuthenticationCredentialsNotFoundException(AuthenticationCredentialsNotFoundException authenticationCredentialsNotFoundException, HttpServletRequest request, HttpServletResponse response, Object handler) {
+        return handleBaseErrorResponse(new AuthRestartException(authenticationCredentialsNotFoundException), request, response, handler);
+    }
+
+    private ModelAndView handleAccessDeniedException(AccessDeniedException accessDeniedException, HttpServletRequest request, HttpServletResponse response, Object handler) {
+        BaseErrorResponse baseErrorResponse;
+        if (accessDeniedException instanceof CsrfException || accessDeniedException instanceof org.springframework.security.web.server.csrf.CsrfException) {
+            baseErrorResponse = new dev.bayun.id.core.exception.CsrfException(accessDeniedException);
+        } else if (accessDeniedException instanceof AuthorizationServiceException){
+            baseErrorResponse = new AuthorizationFailedException(accessDeniedException);
+        } else {
+            baseErrorResponse = new ForbiddenException(accessDeniedException);
+        }
+
+        return handleBaseErrorResponse(baseErrorResponse, request, response, handler);
     }
 
     private ModelAndView handleBindException(BindException bindException, HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -80,6 +108,7 @@ public class BaseHandlerExceptionResolver implements HandlerExceptionResolver, O
 
         BaseErrorBody body = baseErrorResponse.getBody();
         ModelAndView modelAndView = new ModelAndView(new MappingJackson2JsonView());
+        modelAndView.addObject("ok", baseErrorResponse.isOk());
         modelAndView.addObject("status", body.getStatus());
         modelAndView.addObject("type", body.getType());
         modelAndView.addObject("description", body.getDescription());

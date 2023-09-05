@@ -6,12 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.UUID;
 
 @Repository
 public class AvatarRepository {
@@ -28,14 +26,12 @@ public class AvatarRepository {
         avatar.setId(id);
 
         try {
-            Path accountPath = this.root.resolve(id.toString());
-            if (Files.notExists(accountPath)) {
+            Path avatarPath = this.root.resolve(id + ".png");
+            if (Files.notExists(avatarPath)) {
                 return null;
             }
 
-            avatar.setSmall(get(accountPath, "small.png"));
-            avatar.setMedium(get(accountPath, "medium.png"));
-            avatar.setLarge(get(accountPath, "large.png"));
+            avatar.setBlob(Files.readAllBytes(avatarPath));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -43,34 +39,17 @@ public class AvatarRepository {
         return avatar;
     }
 
-    private byte[] get(Path accountPath, String file) throws IOException {
-        Path filePath = accountPath.resolve(file);
-        if (Files.notExists(filePath)) {
-            return null;
-        }
-
-        return Files.readAllBytes(filePath);
-    }
-
     public void save(Avatar avatar) {
         try {
-            Path avatarPath = this.root.resolve(avatar.getId().toString());
-            save(avatarPath, "small.png", avatar.getSmall());
-            save(avatarPath, "medium.png", avatar.getMedium());
-            save(avatarPath, "large.png", avatar.getLarge());
+            Path avatarPath = this.root.resolve(avatar.getId() + ".png");
+            if (Files.exists(avatarPath)) {
+                throw new RuntimeException("avatar with id=" + avatar.getId() + " already exists");
+            }
+
+            Files.createFile(avatarPath);
+            Files.copy(new ByteArrayInputStream(avatar.getBlob()), avatarPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
-    private void save(Path root, String fileName, byte[] bytes) throws IOException {
-        if (Files.notExists(root)) {
-            Files.createDirectories(root);
-        }
-
-        Path filePath = root.resolve(fileName);
-        Files.createFile(filePath);
-        Files.copy(new ByteArrayInputStream(bytes), filePath, StandardCopyOption.REPLACE_EXISTING);
-    }
-
 }

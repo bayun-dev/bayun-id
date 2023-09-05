@@ -9,15 +9,20 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 
 @Configuration
 @AllArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private AccountService accountService;
@@ -30,6 +35,12 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests((authorize) -> authorize
                 .anyRequest().permitAll());
 
+        http.headers(configurer -> {
+            configurer.contentSecurityPolicy(cspConfigurer -> {
+                cspConfigurer.policyDirectives("frame-ancestors 'self'");
+            });
+//            configrer.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
+        });
         http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
         http.anonymous(AbstractHttpConfigurer::disable);
@@ -45,6 +56,7 @@ public class SecurityConfiguration {
     public AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider daoProvider = new DaoAuthenticationProvider();
         daoProvider.setForcePrincipalAsString(true);
+        daoProvider.setHideUserNotFoundExceptions(false);
         daoProvider.setPasswordEncoder(passwordEncoder);
         daoProvider.setUserDetailsService(accountService);
 

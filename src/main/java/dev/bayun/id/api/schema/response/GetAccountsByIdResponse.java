@@ -11,7 +11,7 @@ import lombok.ToString;
 @Setter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class GetAccountsByIdResponse extends AbstractResponse {
+public class GetAccountsByIdResponse extends AbstractBaseResponse {
 
     @JsonValue
     private Account account;

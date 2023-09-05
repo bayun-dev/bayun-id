@@ -98,7 +98,7 @@ const InputText = (props: PropsWithChildren<InputTextProps>) => {
     return <>
         <div className='w-full'>
             { props.label && <label htmlFor={id} className={lClasses}>{props.label}</label> }
-            <input defaultValue={props.defaultValue} autoFocus={props.autoFocus} id={id} type={getType()} placeholder={props.placeholder} className={iClasses} disabled={props.disabled} onChange={props.onChange}/>
+            <input value={props.value} defaultValue={props.defaultValue} autoFocus={props.autoFocus} id={id} type={getType()} placeholder={props.placeholder} className={iClasses} disabled={props.disabled} onChange={props.onChange}/>
             { props.errorMessage && <p className="mt-2 text-sm text-red-600 dark:text-red-500">{props.errorMessage}</p> }
             { props.children && <div id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">{props.children}</div> }
         </div>

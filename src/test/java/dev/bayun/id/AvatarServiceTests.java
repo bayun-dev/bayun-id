@@ -1,13 +1,8 @@
 package dev.bayun.id;
 
-import dev.bayun.id.core.entity.account.Avatar;
 import dev.bayun.id.core.repository.AvatarRepository;
 import dev.bayun.id.core.service.AvatarService;
-import lombok.AllArgsConstructor;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.imageio.ImageIO;

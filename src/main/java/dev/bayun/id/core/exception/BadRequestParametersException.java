@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 
 public class BadRequestParametersException extends BadRequestException {
 
+    public static final String TYPE = "BAD_REQUEST_PARAMETERS";
+    public static final String DESCRIPTION = "The provided request parameters is not valid.";
+
     public BadRequestParametersException(String... parameters) {
         this(null, parameters);
     }
@@ -14,10 +17,7 @@ public class BadRequestParametersException extends BadRequestException {
     }
 
     public BadRequestParametersException(HttpHeaders headers, Throwable cause, String... parameters) {
-        this(headers,
-                new BadRequestParametersErrorBody(BaseErrorType.BAD_REQUEST_PARAMETERS.getType(),
-                        BaseErrorType.BAD_REQUEST_PARAMETERS.getDescription(), parameters),
-                cause);
+        this(headers, new BadRequestParametersErrorBody(TYPE, DESCRIPTION, parameters), cause);
     }
 
     protected BadRequestParametersException(HttpHeaders headers, BadRequestParametersErrorBody body, Throwable cause) {

@@ -13,6 +13,10 @@ import java.util.Objects;
 @Getter
 public class BaseErrorResponseException extends RuntimeException implements BaseErrorResponse {
 
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.PROTECTED)
+    private boolean ok = false;
+
     private final int status;
 
     private final BaseErrorBody body;
@@ -35,5 +39,10 @@ public class BaseErrorResponseException extends RuntimeException implements Base
         this.status = status;
         this.headers = Objects.requireNonNullElse(headers, HttpHeaders.EMPTY);
         this.body = body;
+    }
+
+    @Override
+    public boolean isOk() {
+        return this.ok;
     }
 }

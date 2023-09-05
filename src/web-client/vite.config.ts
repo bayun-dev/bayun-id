@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // publicDir: './src/assets',
+  // assetsInclude: ['./src/assets/*.png'],
   build: {
     outDir: '../main/resources/ui',
     rollupOptions: {
@@ -11,7 +13,14 @@ export default defineConfig({
         login: './login.html',
         signup: './signup.html',
         index: './index.html',
-        error: './error.html'
+        error: './error.html',
+        widget: './widget.html',
+        resetPassword: './reset-password.html'
+      },
+      output: {
+        entryFileNames: `assets/[hash].js`,
+        chunkFileNames: `assets/[hash].js`,
+        assetFileNames: `assets/[hash].[ext]`
       }
     }
   },
@@ -33,6 +42,14 @@ export default defineConfig({
       '^\/signup(?!\.html)': {
         target: 'http://localhost:5173',
         rewrite: path => 'signup.html'
+      },
+      '^\/widget(?!\.html)': {
+        target: 'http://localhost:5173',
+        rewrite: path => 'widget.html'
+      },
+      '^\/reset-password(?!\.html)': {
+        target: 'http://localhost:5173',
+        rewrite: path => 'reset-password.html'
       },
       '/avatar': 'http://localhost:8181'
 

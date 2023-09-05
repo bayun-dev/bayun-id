@@ -14,8 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -34,8 +33,16 @@ public class AvatarService {
         }
     }
 
+    public Avatar getDefaultAvatar() {
+        return avatarRepository.get("default");
+    }
+
     public Avatar get(String id) {
-        return avatarRepository.get(id);
+        if (id == null) {
+            return null;
+        } else {
+            return avatarRepository.get(id);
+        }
     }
 
     public Avatar save(byte[] origin) {
@@ -45,12 +52,11 @@ public class AvatarService {
     private Avatar saveWithId(byte[] origin, String id) {
         Avatar avatar = new Avatar();
         avatar.setId(id);
+
         try {
             BufferedImage originImage = ImageIO.read(new ByteArrayInputStream(origin));
-            BufferedImage croppedOriginImage = cropToSquare(originImage);
-            avatar.setSmall(toBytes(scale(croppedOriginImage, 64, 64)));
-            avatar.setMedium(toBytes(scale(croppedOriginImage, 128, 128)));
-            avatar.setLarge(toBytes(scale(croppedOriginImage, 256, 256)));
+            avatar.setBlob(toBytes(scale(cropToSquare(originImage), 256, 256)));
+
             avatarRepository.save(avatar);
         } catch (Exception e) {
             throw new RuntimeException(e);

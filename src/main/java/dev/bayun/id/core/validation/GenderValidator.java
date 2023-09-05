@@ -1,6 +1,5 @@
 package dev.bayun.id.core.validation;
 
-import dev.bayun.id.core.entity.account.Person;
 import dev.bayun.id.core.validation.annotation.Gender;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -21,7 +20,7 @@ public class GenderValidator implements ConstraintValidator<Gender, String> {
         }
 
         try {
-            Person.Gender.fromValue(value);
+//            Person.Gender.fromValue(value);
             return true;
         } catch (IllegalArgumentException e) {
             return false;

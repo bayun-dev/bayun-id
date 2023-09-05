@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 
 public class BadRequestException extends BaseErrorResponseException {
 
+    public static final String TYPE = "BAD_REQUEST";
+    public static final String DESCRIPTION = "The request is incorrect.";
+
     public BadRequestException() {
         this(null);
     }
@@ -14,10 +17,7 @@ public class BadRequestException extends BaseErrorResponseException {
     }
 
     public BadRequestException(HttpHeaders headers, Throwable cause) {
-        this(headers,
-                new BadRequestErrorBody(BaseErrorType.BAD_REQUEST.getType(),
-                        BaseErrorType.BAD_REQUEST.getDescription()),
-                cause);
+        this(headers, new BadRequestErrorBody(TYPE, DESCRIPTION), cause);
     }
 
     protected BadRequestException(HttpHeaders headers, BadRequestErrorBody body, Throwable cause) {

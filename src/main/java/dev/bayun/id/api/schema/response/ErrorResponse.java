@@ -12,7 +12,7 @@ import java.util.HashSet;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorResponse extends AbstractResponse {
+public class ErrorResponse extends AbstractBaseResponse {
 
     private Collection<Error> errors;
 

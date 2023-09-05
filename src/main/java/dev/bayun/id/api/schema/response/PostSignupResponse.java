@@ -11,6 +11,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class PostSignupResponse extends AbstractResponse {
+public class PostSignupResponse extends AbstractBaseResponse {
 
 }

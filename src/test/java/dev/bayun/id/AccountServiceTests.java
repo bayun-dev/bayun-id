@@ -3,13 +3,14 @@ package dev.bayun.id;
 import dev.bayun.id.core.configuration.PasswordEncoderConfiguration;
 import dev.bayun.id.core.entity.account.Account;
 import dev.bayun.id.core.entity.account.Authority;
-import dev.bayun.id.core.entity.account.Deactivation;
-import dev.bayun.id.core.entity.account.Person;
-import dev.bayun.id.core.modal.AccountUpdateToken;
-import dev.bayun.id.core.modal.AccountCreateToken;
+import dev.bayun.id.core.entity.account.AccountUpdateToken;
+import dev.bayun.id.core.entity.account.AccountCreateToken;
 import dev.bayun.id.core.repository.AccountRepository;
+import dev.bayun.id.core.repository.AvatarRepository;
 import dev.bayun.id.core.service.AccountService;
+import dev.bayun.id.core.service.AvatarService;
 import dev.bayun.id.core.service.DefaultAccountService;
+import dev.bayun.id.core.service.email.EmailService;
 import dev.bayun.id.util.TestAccountBuilder;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @DataJpaTest
-@Import({PasswordEncoderConfiguration.class, DefaultAccountService.class})
+@Import({PasswordEncoderConfiguration.class, DefaultAccountService.class, AvatarService.class, AvatarRepository.class})
 @AutoConfigureEmbeddedDatabase(type = AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES)
 public class AccountServiceTests {
 
@@ -42,6 +44,9 @@ public class AccountServiceTests {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @MockBean
+    private EmailService emailService;
 
     @BeforeEach
     public void setUp() {
