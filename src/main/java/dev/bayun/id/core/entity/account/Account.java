@@ -36,10 +36,6 @@ public class Account implements UserDetails, Serializable {
     @Column(name = "email_id")
     private UUID emailId;
 
-    private boolean blocked;
-
-    private boolean deleted;
-
     @ElementCollection(targetClass = Authority.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "account_authorities", joinColumns = @JoinColumn(name = "account_id"))
     @Column(name = "authority")
@@ -58,7 +54,7 @@ public class Account implements UserDetails, Serializable {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !blocked;
+        return !authorities.contains(Authority.ROLE_BLOCKED);
     }
 
     @Override
@@ -68,6 +64,6 @@ public class Account implements UserDetails, Serializable {
 
     @Override
     public boolean isEnabled() {
-        return !deleted;
+        return !authorities.contains(Authority.ROLE_DELETED);
     }
 }

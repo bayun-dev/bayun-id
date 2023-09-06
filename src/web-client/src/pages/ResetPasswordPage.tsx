@@ -39,7 +39,7 @@ const ResetPasswordForm = () => {
             if (r.data.ok) {
                 setSuccessEmail(r.data.email)
             } else {
-                throw ErrorType.INTERNAL_ERROR
+                throw ErrorType.INTERNAL
             }
         }).catch((e: AxiosError<ErrorBody>) => {
             if (!(e.response && e.response.data)) {
@@ -48,7 +48,7 @@ const ResetPasswordForm = () => {
             }
 
             const errorBody = e.response.data
-            if (errorBody.type === ErrorType.BAD_REQUEST_PARAMETERS) {
+            if (errorBody.type === ErrorType.INVALID_REQUEST_PARAM) {
                 errorBody.parameters?.forEach(parameter => {
                     if (parameter === 'username') {
                         setUsernameError('Invalid')

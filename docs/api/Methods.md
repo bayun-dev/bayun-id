@@ -1,252 +1,187 @@
 # API Методы
 
-## Список доступных методов
+## Доступные методы
+Все методы нечувствительны к регистру. 
+Мы поддерживаем HTTP-методы `GET` и `POST`.  
+Для передачи параметров в запросах используйте:
+* `URL query string`
+* `application/x-www-form-urlencoded`
+* `multipart/form-data`
 
-### Действия с аккаунтами
-| Name                                                   | Description                                           |
-|:-------------------------------------------------------|:------------------------------------------------------|
-| [GET `/accounts/{id}`](#get-accountsid)                | Отдает информацию об аккаунте по идентификатору.      |
-| [PATCH `/accounts/{id}`](#patch-accountsid)            | Изменяет информацию об аккаунте по идентификатору.    |
-| [DELETE `/accounts/{id}`](#delete-accountsid)          | Удаляет всю информацию об аккаунте по идентификатору. |
-| [POST `/accounts/{id}/avatar`](#post-accountsidavatar) | Загружает портрет на сервер.                          |
+При успешном вызове будет возвращен JSON-объект, содержащий результат.
 
-### Авторизация
-| Name                                        | Description                                                         |
-|:--------------------------------------------|:--------------------------------------------------------------------|
-| [`/login`](#login)                          | Авторизирует пользователя по имени пользователя и паролю.           |
-| [`/login/availability`](#loginavailability) | Проверяет доступность входа для пользователя по имени пользователя. |
+### Действия с аккаунтом
+* [`me.get`](#me-get) Отдает информацию об аккаунте.
+* [`me.save`](#me-save) Изменяет информацию об аккаунте.
+* [`me.delete`](#me-delete) Удаляет информацию об аккаунте.
+* [`me.emailConfirm`](#me-emailconfirm) Подтверждает адрес электронной почты.
 
-### Регистрация
-| Name                                          | Description                                                                         |
-|:----------------------------------------------|:------------------------------------------------------------------------------------|
-| [`/signup`](#signup)                          | Регистрирует новый аккаунт.                                                         |
-| [`/signup/availability`](#signupavailability) | Проверяет доступность регистрации для имени пользователя.                           |
+### Авторизация и регистрация
+* [`auth.singIn`](#auth-singin) Авторизирует пользователя.
+* [`auth.signOut`](#auth-signup) Деавторизирует пользователя.
+* [`auth.signUp`](#auth-signup) Регистрирует новый аккаунт.
+* [`auth.resetPassword`](#auth-resetpassword) Сброс пароля от аккаунта.
 
 ## Подробное описание методов
 
-### GET `/accounts/{id}`
-> Отдает информацию об аккаунте по идентификатору.
-> 
-> Для получения информации об авторизированном аккаунте можно использовать строковый литерал `me` вместо идентификатора аккаунта.
-
-#### Запрос
-```http request
-GET /api/accounts/{id}
-Accept: application/json
-```
+### `me.get`
+> Отдает информацию об аккаунте.
 
 #### Результат
-Метод возвращает объект [Account](#).
+Метод возвращает следующий объект:
+
+```json
+{
+  "ok": true,
+  "id": "uuid",
+  "username": "string",
+  "firstName": "string",
+  "lastName": "string",
+  "avatarId": "string",
+  "email": "string",
+  "emailConfirmed": true
+}
+```
 
 #### Коды ошибок
-В ходе выполнения могут произойти общие ошибки, а так же:
-* `ACCOUNT_NOT_FOUND` Account not found.
+В ходе выполнения могут произойти следующие ошибки:
+* `403` `AUTH_RESTART` Restart the authorization process.
+* `403` `ACCESS_DENIED` Access denied. If account blocked or deleted.
 ---
 
-### PATCH `/accounts/{id}`
-> Изменяет информацию об аккаунте по идентификатору.
->
-> Для изменения информации об авторизированном аккаунте можно использовать строковый литерал `me` вместо идентификатора аккаунта.
-
-#### Запрос
-```http request
-PATCH /api/accounts/{id}
-Content-Type: application/x-www-form-urlencoded
-Accept: application/json
-```
+### `me.save`
+> Изменяет информацию об аккаунте.
 
 #### Параметры
 * `fistName` `string` `optional` New first name
 * `lastName` `string` `optional` New last name
-* `dateOfBirth` `string` `optional` New date of birth
-* `gender` `string` `optional` New gender
 * `password` `string` `optional` New password
 * `email` `string` `optional` New email
+* `avatar` `InputFile` `optional` New avatar
+* `dropAvatar` `boolean` `optional` if **true** then drop an avatar
 
 #### Результат
-Метод возвращает объект, содержащий единственное поле:
-* `changed` `boolean` информация об изменении аккаунта.
-  * `true` аккаунт изменен.
-  * `false` ни одно из полей не сохранено.
+Метод возвращает следующий объект:
 
-#### Коды ошибок
-В ходе выполнения могут произойти общие ошибки, а так же:
-* `ACCOUNT_NOT_FOUND` Account not found.
-* `DATE_OF_BIRTH_INVALID` The provided date of birth is not valid.
-* `EMAIL_INVALID` The provided email is not valid.
-* `FIRSTNAME_INVALID` The provided first name is not valid.
-* `GENDER_INVALID` The provided gender is not valid.
-* `LASTNAME_INVALID` The provided last name is not valid.
-* `PASSWORD_INVALID` The provided password is not valid.
----
-
-
-### DELETE `/accounts/{id}`
-> Удаляет всю информацию об аккаунте по идентификатору.
->
-> Для удаления информации об авторизированном аккаунте можно использовать строковый литерал `me` вместо идентификатора аккаунта.
-
-#### Запрос
-```http request
-DELETE /api/accounts/{id}
-Accept: application/json
+```json
+{
+  "ok": true
+}
 ```
-
-#### Результат
-Метод возвращает объект, не содержащий полей.
-
-#### Коды ошибок
-В ходе выполнения могут произойти общие ошибки, а так же:
-* `ACCOUNT_NOT_FOUND` Account not found.
----
-
-### GET `/avatar/{id}/{size}`
-> Отдает портрет по идентификатору и размеру.
-
-#### Запрос
-```http request
-GET /avatar/{id}/{size}
-Accept: image/png
-```
-
-#### Доступные размеры
-* `small` 64 x 64 пикселей.
-* `medium` 128 x 128 пикселей.
-* `large` 256 x 256 пикселей.
-
-#### Результат
-Метод возвращает изображение портрета.
 
 #### Коды ошибок
 В ходе выполнения могут произойти следующие ошибки:
-* `404 Not Found` Avatar not found.
+* `400` `INVALID_REQUEST_PARAM` One of the parameters specified was missing or not valid.
+* `403` `AUTH_RESTART` Restart the authorization process.
+* `403` `ACCESS_DENIED` Access denied. If account blocked or deleted.
 ---
 
-### POST `/accounts/{id}/avatar`
-> Загружает портрет на сервер.
->
-> Возможно использовать строковый литерал `me` вместо идентификатора аккаунта.
 
-#### Запрос
-```http request
-POST /api/accounts/{id}/avatar
-Content-Type: multipart/form-data
-Accept: application/json
-```
+### `me.delete`
+> Удаляет информацию об аккаунте.
 
 #### Результат
-Метод возвращает объект, содержащий единственное поле:
-* `avatarId` `string` идентификатор загруженного портрета.
+Метод возвращает следующий объект:
+
+```json
+{
+  "ok": true
+}
+```
 
 #### Коды ошибок
-В ходе выполнения могут произойти общие ошибки, а так же:
-* `ACCOUNT_NOT_FOUND` Account not found.
+В ходе выполнения могут произойти следующие ошибки:
+* `400` `INVALID_REQUEST_PARAM` One of the parameters specified was missing or not valid.
+* `400` `PASSWORD_INVALID` The provided password is not valid.
+* `403` `AUTH_RESTART` Restart the authorization process.
+* `403` `ACCOUNT_BLOCKED` Account blocked.
+* `403` `ACCOUNT_DELETED` Account deleted.
 ---
 
-### `/login`
-> Авторизирует пользователя по имени пользователя и паролю.
-
-#### Запрос
-```http request
-POST /api/login
-Content-Type: application/x-www-form-urlencoded
-```
+### `auth.signIn`
+> Авторизирует пользователя.
 
 #### Параметры
 * `username` `string` Username
 * `password` `string` Password
 
 #### Результат
-Метод возвращает объект, содержащий единственное поле:
-* `redirectUrl` `string` url, по которому клиент ДОЛЖЕН перейти для продолжения авторизации.
+Метод возвращает следующий объект:
 
-#### Коды ошибок
-В ходе выполнения могут произойти общие ошибки, а так же:
-* `ACCOUNT_BLOCKED` Account blocked.
-* `ACCOUNT_DELETED` Account deleted.
-* `CREDENTIALS_NOT_FOUND` The provided credentials not found.
-* `PASSWORD_INVALID` The provided password is not valid.
-* `USERNAME_INVALID` The provided username is not valid.
----
-
-### `/login/availability`
-> Проверяет доступность входа для пользователя по имени пользователя.
-
-#### Запрос
-```http request
-POST /api/login/availability
-Content-Type: application/x-www-form-urlencoded
+```json
+{
+  "ok": true,
+  "redirectUri": "uri"
+}
 ```
 
-#### Параметры
-* `username` `string` Username
+#### Коды ошибок
+В ходе выполнения могут произойти следующие ошибки:
+* `400` `INVALID_REQUEST_PARAM` One of the parameters specified was missing or not valid.
+* `400` `USERNAME_UNOCCUPIED` The username is not yet being used.
+* `400` `PASSWORD_INVALID` The provided password is not valid.
+* `403` `ACCOUNT_BLOCKED` Account blocked.
+* `403` `ACCOUNT_DELETED` Account deleted.
+---
+
+### `auth.signOut`
+> Деавторизирует пользователя.
 
 #### Результат
-Метод возвращает объект, содержащий следующие поля:
-* `available` `boolean` информация о доступности авторизации.
-  * `true` авторизация доступна.
-  * `false` авторизация недоступна.
-* `reason` `string` `optional` причина, по которой авторизация недоступна.
-  * `USERNAME_NOT_OCCUPIED` имя пользователя не зарегистрированно.
-  * `ACCOUNT_BLOCKED` аккаунт заблокирован. 
-  * `ACCOUNT_DELETED` аккаунт удален.
+Метод возвращает следующий объект:
+
+```json
+{
+  "ok": true
+}
+```
 
 #### Коды ошибок
-В ходе выполнения могут произойти общие ошибки, а так же:  
-* `USERNAME_INVALID` The provided username is not valid.
+В ходе выполнения не могут произойти ошибки.
+
 ---
 
-### `/signup`
+### `auth.signUp`
 > Регистрирует новый аккаунт.
-
-#### Запрос
-```http request
-POST /api/signup
-Content-Type: application/x-www-form-urlencoded
-```
 
 #### Параметры
 * `username` `string` New account username
 * `fistName` `string` New account first name
 * `lastName` `string` New account last name
-* `dateOfBirth` `string` New account date of birth
-* `gender` `string` New account gender
 * `password` `string` New account password
-* `email` `string` `optional` New account email
+* `email` `string` New account email
 
 #### Результат
-Метод возвращает объект, несодержащий полей.
+Метод возвращает следующий объект:
 
-#### Коды ошибок
-В ходе выполнения могут произойти общие ошибки, а так же:
-* `DATE_OF_BIRTH_INVALID` The provided date of birth is not valid.   
-* `EMAIL_INVALID` The provided email is not valid.           
-* `FIRSTNAME_INVALID` The provided first name is not valid.      
-* `GENDER_INVALID` The provided gender is not valid.          
-* `LASTNAME_INVALID` The provided last name is not valid.       
-* `PASSWORD_INVALID` The provided password is not valid.        
-* `USERNAME_INVALID` The provided username is not valid.
-* `USERNAME_OCCUPIED` The provided username is already occupied.
----
-
-### `/signup/availability`
-> Проверяет доступность регистрации для имени пользователя.
-
-#### Запрос
-```http request
-POST /api/signup/availability
-Content-Type: application/x-www-form-urlencoded
+```json
+{
+  "ok": true
+}
 ```
 
+#### Коды ошибок
+В ходе выполнения могут произойти следующие ошибки:
+* `400` `INVALID_REQUEST_PARAM` One of the parameters specified was missing or not valid.
+* `400` `USERNAME_OCCUPIED` The username is already in use.
+
+---
+
+### `auth.resetPassword` 
+> Сброс пароля от аккаунта.
+
 #### Параметры
-* `username` `string` New username
+* `username` `string` Username
 
 #### Результат
-Метод возвращает объект, содержащий единственное поле:
-* `available` `boolean` информация о доступности для регистрации.
-  * `true` регистрация доступна.
-  * `false` регистрация недоступна.
+Метод возвращает следующий объект:
+
+```json
+{
+  "ok": true
+}
+```
 
 #### Коды ошибок
-В ходе выполнения могут произойти общие ошибки, а так же:
-* `USERNAME_INVALID` The provided username is not valid.
+В ходе выполнения могут произойти следующие ошибки:
+* `403` `EMAIL_NOT_CONFIRMED` One of the parameters specified was missing or not valid.

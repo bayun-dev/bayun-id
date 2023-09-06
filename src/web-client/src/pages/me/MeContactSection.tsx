@@ -39,7 +39,7 @@ const MeContactSwapElement = (props: SwapElementProps) => {
             if (r.data.ok) {
                 window.location.reload()
             } else {
-                throw ErrorType.INTERNAL_ERROR
+                throw ErrorType.INTERNAL
             }
         }).catch((e: AxiosError<ErrorBody>) => {
             setDisabledSaveButton(false)
@@ -50,7 +50,7 @@ const MeContactSwapElement = (props: SwapElementProps) => {
             }
 
             const errorBody = e.response.data
-            if (errorBody.type === ErrorType.BAD_REQUEST_PARAMETERS) {
+            if (errorBody.type === ErrorType.INVALID_REQUEST_PARAM) {
                 errorBody.parameters?.forEach(parameter => {
                     if (parameter === 'email') {
                         setEmailError('Invalid')

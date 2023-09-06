@@ -19,26 +19,6 @@ class BayunIdApplicationTests {
 
     @Test
     void contextLoads() {
-        try {
-            accountRepository.save(new TestAccountBuilder()
-                    .id(UUID.randomUUID())
-                    .username("msyaskov")
-                    .firstName("FirstName")
-                    .lastName("LastName")
-                    .dateOfBirth("01.01.1999")
-                    .gender(Person.Gender.MALE)
-                    .email("mail@example.com")
-                    .emailConfirmed(false)
-                    .registrationDate(System.currentTimeMillis())
-                    .authorities(new HashSet<>(Set.of(Authority.ROLE_USER)))
-                    .deactivated(false)
-                    .secretHash("password")
-                    .secretLastModified(System.currentTimeMillis())
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
 }

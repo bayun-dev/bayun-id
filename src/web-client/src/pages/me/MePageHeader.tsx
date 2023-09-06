@@ -14,9 +14,6 @@ const MePageHeader = () => {
             <Logo/>
         </a>
         <div className='h-full flex justify-end items-center'>
-            {/*<div className='h-10 w-10 rounded-full overflow-hidden'>*/}
-            {/*    <img className='w-full h-full' src={`/avatar/${me.avatarId == null ? 'default' : me.avatarId}`} alt=''/>*/}
-            {/*</div>*/}
             <Widget avatarSrc={`/avatar/${me.avatarId == null ? 'default' : me.avatarId}`}/>
         </div>
     </Header>

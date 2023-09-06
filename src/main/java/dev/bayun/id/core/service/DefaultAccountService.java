@@ -5,13 +5,10 @@ import dev.bayun.id.core.entity.account.AccountCreateToken;
 import dev.bayun.id.core.entity.account.AccountUpdateToken;
 import dev.bayun.id.core.entity.account.Authority;
 import dev.bayun.id.core.exception.AccountNotFoundException;
-import dev.bayun.id.core.exception.AccountUpdateException;
-import dev.bayun.id.core.exception.UsernameOccupiedException;
 import dev.bayun.id.core.repository.AccountRepository;
 import dev.bayun.id.core.util.UUIDGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +22,14 @@ import java.util.*;
 @AllArgsConstructor
 public class DefaultAccountService implements AccountService {
 
+    public static final Collection<Authority> AUTHORITY_FOR_DELETED = Collections.singleton(Authority.ROLE_DELETED);
+
+    public static final Collection<Authority> AUTHORITY_FOR_BLOCKED = Collections.singleton(Authority.ROLE_BLOCKED);
+
+    public static final Collection<Authority> AUTHORITY_FOR_NEW_USER = Collections.singleton(Authority.ROLE_USER);
+
+    public static final Collection<Authority> AUTHORITY_FOR_ADMIN = Set.of(Authority.ROLE_USER, Authority.ROLE_ADMIN);
+
     @Setter
     private AccountRepository accountRepository;
 
@@ -33,7 +38,7 @@ public class DefaultAccountService implements AccountService {
 
     public Account block(UUID id) {
         Account account = loadUserById(id);
-        account.setBlocked(true);
+        account.setAuthorities(new HashSet<>(AUTHORITY_FOR_BLOCKED));
 
         return accountRepository.save(account);
     }
@@ -41,10 +46,8 @@ public class DefaultAccountService implements AccountService {
     @Override
     public Account create(AccountCreateToken token) {
         Account account = new Account();
-        account.setAuthorities(Arrays.asList(Authority.ROLE_USER));
+        account.setAuthorities(new HashSet<>(AUTHORITY_FOR_NEW_USER));
         account.setAvatarId(null);
-        account.setBlocked(false);
-        account.setDeleted(false);
         account.setEmailId(null);
         account.setFirstName(token.getFirstName());
         account.setId(UUIDGenerator.getV7());
@@ -60,14 +63,9 @@ public class DefaultAccountService implements AccountService {
         Assert.notNull(id, "The id must not be null");
 
         Account account = loadUserById(id);
-
-        Set<Authority> authoritiesForDeleted = new HashSet<>();
-        authoritiesForDeleted.add(Authority.ROLE_DELETED);
-        account.setAuthorities(authoritiesForDeleted);
+        account.setAuthorities(new HashSet<>(AUTHORITY_FOR_DELETED));
 
         account.setAvatarId(null);
-        account.setBlocked(false);
-        account.setDeleted(false);
         account.setEmailId(null);
         account.setFirstName(null);
         account.setLastName(null);
@@ -92,7 +90,7 @@ public class DefaultAccountService implements AccountService {
     public Account loadUserById(UUID id) {
         Assert.notNull(id, "The id must not be null");
         return accountRepository.findById(id)
-                .orElseThrow(AccountNotFoundException::new);
+                .orElseThrow(() -> new AccountNotFoundException("Account (id=%s) not found".formatted(id)));
     }
 
     @Override
@@ -100,7 +98,7 @@ public class DefaultAccountService implements AccountService {
         Assert.notNull(username, "The username must not be null");
         return accountRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "account with provided username (%s) not found".formatted(username)));
+                        "account with username (%s) not found".formatted(username)));
     }
 
     // return raw password
@@ -120,35 +118,31 @@ public class DefaultAccountService implements AccountService {
         Assert.notNull(id, "The id must not be null");
         Assert.notNull(id, "The token must not be null");
 
-        try {
-            Account account = loadUserById(id);
+        Account account = loadUserById(id);
 
-            if (token.isDropAvatar()) {
-                account.setAvatarId(null);
-            } else if (token.getAvatarId() != null) {
-                account.setAvatarId(token.getAvatarId());
-            }
-
-            if (token.getEmailId() != null) {
-                account.setEmailId(token.getEmailId());
-            }
-
-            if (token.getFirstName() != null) {
-                account.setFirstName(token.getFirstName());
-            }
-
-            if (token.getLastName() != null) {
-                account.setLastName(token.getLastName());
-            }
-
-            if (token.getPassword() != null) {
-                account.setPasswordHash(passwordEncoder.encode(token.getPassword()));
-            }
-
-            return accountRepository.save(account);
-        } catch (Exception e) {
-            throw new AccountUpdateException(e);
+        if (token.isDropAvatar()) {
+            account.setAvatarId(null);
+        } else if (token.getAvatarId() != null) {
+            account.setAvatarId(token.getAvatarId());
         }
+
+        if (token.getEmailId() != null) {
+            account.setEmailId(token.getEmailId());
+        }
+
+        if (token.getFirstName() != null) {
+            account.setFirstName(token.getFirstName());
+        }
+
+        if (token.getLastName() != null) {
+            account.setLastName(token.getLastName());
+        }
+
+        if (token.getPassword() != null) {
+            account.setPasswordHash(passwordEncoder.encode(token.getPassword()));
+        }
+
+        return accountRepository.save(account);
     }
 
     private String generatePassword() {

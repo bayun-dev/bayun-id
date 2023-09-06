@@ -41,7 +41,7 @@ const MeLoginMethodsSwapElement = (props: SwapElementProps) => {
             if (r.data.ok) {
                 window.location.reload()
             } else {
-                throw ErrorType.INTERNAL_ERROR
+                throw ErrorType.INTERNAL
             }
         }).catch((e: AxiosError<ErrorBody>) => {
             setDisabledSaveButton(false)
@@ -52,7 +52,7 @@ const MeLoginMethodsSwapElement = (props: SwapElementProps) => {
             }
 
             const errorBody = e.response.data
-            if (errorBody.type === ErrorType.BAD_REQUEST_PARAMETERS) {
+            if (errorBody.type === ErrorType.INVALID_REQUEST_PARAM) {
                 errorBody.parameters?.forEach(parameter => {
                     if (parameter === 'password') {
                         setPasswordError('Invalid')
@@ -80,7 +80,6 @@ const MeLoginMethodsSwapElement = (props: SwapElementProps) => {
 
 const MeLoginMethodsSection = () => {
 
-    const me = useLoaderData() as Account
     const [swap, setSwap] = useState<boolean>(false)
 
     return <SwapSection title='Login methods' description='Make sure you can always access your Bayun ID by keeping this information up to date'

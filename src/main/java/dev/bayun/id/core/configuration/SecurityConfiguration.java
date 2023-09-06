@@ -39,7 +39,6 @@ public class SecurityConfiguration {
             configurer.contentSecurityPolicy(cspConfigurer -> {
                 cspConfigurer.policyDirectives("frame-ancestors 'self'");
             });
-//            configrer.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
         });
         http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);

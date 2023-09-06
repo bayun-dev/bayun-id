@@ -10,11 +10,11 @@ const MePageLoader = async (): Promise<Account | void> => { // non void, just ty
         if (r.data.ok) {
             return r.data as Account
         } else {
-            throw ErrorType.INTERNAL_ERROR
+            throw ErrorType.INTERNAL
         }
     }, (e: AxiosError<ErrorBody>) => {
         if (!e.response || !e.response.data.type) {
-            throw ErrorType.INTERNAL_ERROR
+            throw ErrorType.INTERNAL
         }
 
         throw e.response.data.type

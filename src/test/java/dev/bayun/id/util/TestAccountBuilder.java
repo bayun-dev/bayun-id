@@ -1,6 +1,7 @@
 package dev.bayun.id.util;
 
-import dev.bayun.id.core.entity.account.*;
+import dev.bayun.id.core.entity.account.Account;
+import dev.bayun.id.core.entity.account.Authority;
 
 import java.util.Set;
 import java.util.UUID;
@@ -11,31 +12,21 @@ public class TestAccountBuilder {
 
     private String username;
 
+    private Set<Authority> authorities;
+
+    private String avatarId;
+
     private String firstName;
 
     private String lastName;
 
-    private String dateOfBirth;
+    private String passwordHash;
 
-    private Person.Gender gender;
+    private UUID emailId;
 
-    private String email;
+    private boolean blocked;
 
-    private Boolean emailConfirmed;
-
-    private long registrationDate;
-
-    private String secretHash;
-
-    private long secretLastModified;
-
-    private boolean deactivated;
-
-    private Deactivation.Reason deactivationReason;
-
-    private Long deactivationDate;
-
-    private Set<Authority> authorities;
+    private boolean deleted;
 
     public TestAccountBuilder() {
 
@@ -61,53 +52,18 @@ public class TestAccountBuilder {
         return this;
     }
 
-    public TestAccountBuilder dateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+    public TestAccountBuilder avatarId(String avatarId) {
+        this.avatarId = avatarId;
         return this;
     }
 
-    public TestAccountBuilder gender(Person.Gender gender) {
-        this.gender = gender;
+    public TestAccountBuilder emailId(UUID emailId) {
+        this.emailId = emailId;
         return this;
     }
 
-    public TestAccountBuilder email(String email) {
-        this.email = email;
-        return this;
-    }
-
-    public TestAccountBuilder emailConfirmed(Boolean emailConfirmed) {
-        this.emailConfirmed = emailConfirmed;
-        return this;
-    }
-
-    public TestAccountBuilder registrationDate(long registrationDate) {
-        this.registrationDate = registrationDate;
-        return this;
-    }
-
-    public TestAccountBuilder secretHash(String secretHash) {
-        this.secretHash = secretHash;
-        return this;
-    }
-
-    public TestAccountBuilder secretLastModified(long secretLastModified) {
-        this.secretLastModified = secretLastModified;
-        return this;
-    }
-
-    public TestAccountBuilder deactivated(boolean deactivated) {
-        this.deactivated = deactivated;
-        return this;
-    }
-
-    public TestAccountBuilder deactivationReason(Deactivation.Reason deactivationReason) {
-        this.deactivationReason = deactivationReason;
-        return this;
-    }
-
-    public TestAccountBuilder deactivationDate(Long deactivationDate) {
-        this.deactivationDate = deactivationDate;
+    public TestAccountBuilder passwordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
         return this;
     }
 
@@ -120,35 +76,13 @@ public class TestAccountBuilder {
         Account account = new Account();
         account.setId(this.id);
         account.setUsername(this.username);
-
-        Person person = new Person();
-        person.setFirstName(this.firstName);
-        person.setLastName(this.lastName);
-        person.setDateOfBirth(this.dateOfBirth);
-        person.setGender(this.gender);
-        account.setPerson(person);
-
-        Contact contact = new Contact();
-        contact.setEmail(this.email);
-        contact.setEmailConfirmed(this.emailConfirmed);
-        account.setContact(contact);
-
-        Details details = new Details();
-        details.setRegistrationDate(this.registrationDate);
-        account.setDetails(details);
-
-        Deactivation deactivation = new Deactivation();
-        deactivation.setDeactivated(this.deactivated);
-        deactivation.setReason(this.deactivationReason);
-        deactivation.setDate(this.deactivationDate);
-        account.setDeactivation(deactivation);
-
-        Secret secret = new Secret();
-        secret.setHash(this.secretHash);
-        secret.setLastModifiedDate(this.secretLastModified);
-        account.setSecret(secret);
-
         account.setAuthorities(authorities);
+
+        account.setFirstName(this.firstName);
+        account.setLastName(this.lastName);
+        account.setEmailId(this.emailId);
+        account.setAvatarId(this.avatarId);
+        account.setPasswordHash(this.passwordHash);
 
         return account;
     }

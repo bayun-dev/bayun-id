@@ -7,6 +7,7 @@ import java.io.Serializable;
 public enum Authority implements GrantedAuthority, Serializable {
     ROLE_USER,
     ROLE_ADMIN,
+    ROLE_BLOCKED,
     ROLE_DELETED;
 
     @Override

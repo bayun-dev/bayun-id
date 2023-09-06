@@ -6,7 +6,6 @@ import dev.bayun.id.core.entity.account.Account;
 import dev.bayun.id.core.entity.account.AccountUpdateToken;
 import dev.bayun.id.core.entity.account.Avatar;
 import dev.bayun.id.core.entity.account.Email;
-import dev.bayun.id.core.exception.InternalErrorException;
 import dev.bayun.id.core.exception.PasswordInvalidException;
 import dev.bayun.id.core.secure.annotation.IsUser;
 import dev.bayun.id.core.service.AccountService;
@@ -19,14 +18,14 @@ import dev.bayun.id.core.validation.annotation.Password;
 import jakarta.validation.Valid;
 import lombok.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.session.Session;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +40,12 @@ import java.util.stream.Collectors;
 @IsUser
 @RestController
 @AllArgsConstructor
-public class MethodMe {
+public class MethodsMe {
+
+    public static final String URI_ME_GET_VALUE = "/api/methods/me.get";
+    public static final String URI_ME_SAVE_VALUE = "/api/methods/me.save";
+    public static final String URI_ME_DELETE_VALUE = "/api/methods/me.delete";
+    public static final String URI_ME_EMAIL_CONFIRM_VALUE = "/api/methods/me.emailConfirm";
 
     @Setter
     private AccountService accountService;
@@ -61,45 +65,36 @@ public class MethodMe {
     @Setter
     private MethodHelper methodHelper;
 
-    @PostMapping(path = "/api/methods/me.delete")
-    public MeDeleteResponse delete(@Valid MeDeleteToken token, BindingResult bindingResult, Authentication authentication) {
+    @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, path = MethodsMe.URI_ME_DELETE_VALUE)
+    public MeDeleteResponse delete(@Valid MeDeleteToken token, BindingResult bindingResult, Authentication authentication) throws BindException {
         methodHelper.checkBindingResult(bindingResult);
 
-        Account me = getMeByAuthentication(authentication);
+        Account me = accountService.loadUserByUsername(authentication.getName());
 
         if (passwordEncoder.matches(token.password, me.getPasswordHash())) {
             accountService.delete(me.getId());
         } else {
-            throw new PasswordInvalidException();
+            throw new PasswordInvalidException("The account cannot be deleted because the password is invalid");
         }
 
         return new MeDeleteResponse();
     }
-
-    /**
-     * Получить основную информацию о личном аккаунте.
-     */
-    @GetMapping(path = "/api/methods/me.get",
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    
+    @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, path = MethodsMe.URI_ME_GET_VALUE)
     public MeGetResponse get(Authentication authentication) {
-        Account me = getMeByAuthentication(authentication);
+        Account me = accountService.loadUserByUsername(authentication.getName());
         Email email = emailService.loadById(me.getEmailId());
 
-        return MeGetResponse.builder()
-                .id(me.getId().toString())
-                .avatarId(me.getAvatarId())
-                .firstName(me.getFirstName())
-                .email(email == null ? null : emailService.toHidden(email.getEmail()))
-                .emailConfirmed(email == null ? null : email.isConfirmed())
-                .lastName(me.getLastName())
-                .username(me.getUsername())
-                .build();
+        return new MeGetResponse(me,
+                email == null ? null : emailService.toHidden(email.getEmail()),
+                email == null ? null : email.isConfirmed());
     }
 
-    @GetMapping(path = "/api/methods/me.getActivityHistory",
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST},
+            path = "/api/methods/me.getActivityHistory"
+    )
     public MeGetActivityHistoryResponse getActivityHistory(Authentication authentication) {
-        Account me = getMeByAuthentication(authentication);
+        Account me = accountService.loadUserByUsername(authentication.getName());
 
         Collection<? extends Session> sessions = activityHistoryService.getByPrincipalName(me.getUsername());
 
@@ -117,19 +112,19 @@ public class MethodMe {
      * Если успешно, вернет редирект на страницу аккаунта,
      * иначе вернет страницу с ошибкой 500 INTERNAL_ERROR.
      */
-    @GetMapping(path = "/api/methods/me.emailConfirm")
-    public ResponseEntity<?> emailConfirm(@RequestParam("hash") String emailIdStr, Authentication authentication) {
-        Account me = getMeByAuthentication(authentication);
+    @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, path = MethodsMe.URI_ME_EMAIL_CONFIRM_VALUE)
+    public ResponseEntity<?> emailConfirm(@RequestParam(value = "hash", required = false) String emailIdStr, Authentication authentication) {
+        Account me = accountService.loadUserByUsername(authentication.getName());
         UUID emailId;
         try {
             emailId = UUID.fromString(emailIdStr);
         } catch (Exception e) {
-            throw new InternalErrorException(new Exception("The provided email not in format", e));
+            throw new RuntimeException("The provided email not in format", e);
         }
 
         if (me.getEmailId() == null || !me.getEmailId().equals(emailId)) {
-            throw new InternalErrorException(new Exception("Can't email confirm: meEmailId=%s, provided emailId=%s"
-                    .formatted(me.getEmailId(), emailId)));
+            throw new RuntimeException("Can't email confirm: meEmailId=%s, provided emailId=%s"
+                    .formatted(me.getEmailId(), emailId));
         }
 
         emailService.confirm(emailId);
@@ -143,14 +138,12 @@ public class MethodMe {
      * * BAD_REQUEST
      * * BAD_REQUEST_PARAMETERS
      */
-    @PostMapping(path = "/api/methods/me.save",
-            consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE},
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, path = MethodsMe.URI_ME_SAVE_VALUE)
     public MeSaveResponse save(@Valid MeSaveToken token, BindingResult bindingResult,
-                               Authentication authentication) throws IOException {
+                               Authentication authentication) throws IOException, BindException {
         methodHelper.checkBindingResult(bindingResult);
 
-        Account me = getMeByAuthentication(authentication);
+        Account me = accountService.loadUserByUsername(authentication.getName());
 
         AccountUpdateToken.AccountUpdateTokenBuilder accountUpdateTokenBuilder = AccountUpdateToken.builder()
                 .firstName(token.getFirstName())
@@ -165,7 +158,7 @@ public class MethodMe {
                 try {
                     emailService.sendConfirm(email);
                 } catch (Exception e) {
-                    throw new InternalErrorException(e);
+                    throw new RuntimeException(e);
                 }
                 accountUpdateTokenBuilder.emailId(email.getId());
             }
@@ -181,14 +174,6 @@ public class MethodMe {
         return new MeSaveResponse();
     }
 
-    public Account getMeByAuthentication(Authentication authentication) {
-        if (authentication != null) {
-            return accountService.loadUserByUsername(authentication.getName());
-        } else {
-            return null;
-        }
-    }
-
     public static class MeDeleteResponse extends AbstractBaseResponse {
 
     }
@@ -202,49 +187,34 @@ public class MethodMe {
     }
 
     @Getter
-    @Builder(builderClassName = "Builder")
+    @Data
+    @ToString(callSuper = true)
+    @EqualsAndHashCode(callSuper = true)
     public static class MeGetResponse extends AbstractBaseResponse {
 
-        /**
-         * Account id
-         */
         private String id;
 
-        /**
-         * Account avatar id,
-         * null if default avatar
-         */
         private String avatarId;
 
-        /**
-         * Account email in a secure format, for example: ma***@example.com,
-         * null if no email
-         */
         private String email;
 
-        /**
-         * Is account email confirmed,
-         * true if email confirmed,
-         * false if email not confirmed,
-         * null if email is null
-         */
         private Boolean emailConfirmed;
 
-        /**
-         * First name
-         */
         private String firstName;
 
-        /**
-         * Last name
-         */
         private String lastName;
 
-        /**
-         * Username
-         */
         private String username;
 
+        public MeGetResponse(Account account, String email, Boolean emailConfirmed) {
+            this.id = account.getId().toString();
+            this.avatarId = account.getAvatarId();
+            this.firstName = account.getFirstName();
+            this.email = email;
+            this.emailConfirmed = emailConfirmed;
+            this.lastName = account.getLastName();
+            this.username = account.getUsername();
+        }
     }
 
     @Getter

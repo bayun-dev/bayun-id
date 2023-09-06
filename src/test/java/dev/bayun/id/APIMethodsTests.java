@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureEmbeddedDatabase(type = AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES)
-public class APIEndpointsTests {
+public class APIMethodsTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -52,44 +52,63 @@ public class APIEndpointsTests {
 
     private Map<String, Account> accounts;
 
+    private Account user;
+
     @BeforeAll
     public void setUp() {
-        accounts = new HashMap<>();
-
-        Account normal = accountRepository.save(new TestAccountBuilder()
+        user = new TestAccountBuilder()
                 .id(UUID.randomUUID())
-                .username("normal")
-                .firstName("FirstName")
-                .lastName("LastName")
-                .dateOfBirth("01.01.1999")
-                .gender(Person.Gender.MALE)
-                .email("mail@example.com")
-                .emailConfirmed(false)
-                .registrationDate(System.currentTimeMillis())
+                .username("user")
+                .firstName("UserFirstName")
+                .lastName("UserLastName")
                 .authorities(new HashSet<>(Set.of(Authority.ROLE_USER)))
-                .deactivated(false)
-                .secretHash(passwordEncoder.encode("password"))
-                .secretLastModified(System.currentTimeMillis())
-                .build());
-
-        Account unregistered = new TestAccountBuilder()
-                .id(UUID.randomUUID())
-                .username("unregistered")
-                .firstName("FirstName")
-                .lastName("LastName")
-                .dateOfBirth("01.01.1999")
-                .gender(Person.Gender.MALE)
-                .email("mail@example.com")
-                .emailConfirmed(false)
-                .registrationDate(System.currentTimeMillis())
-                .authorities(new HashSet<>(Set.of(Authority.ROLE_USER)))
-                .deactivated(false)
-                .secretHash(passwordEncoder.encode("password"))
-                .secretLastModified(System.currentTimeMillis())
+                .passwordHash(passwordEncoder.encode("password"))
                 .build();
+    }
 
-        accounts.put(normal.getUsername(), normal);
-        accounts.put(unregistered.getUsername(), unregistered);
+    @Test
+    public void test_apiMethods_error_METHOD_INVALID() throws Exception {
+//        RequestBuilder requestBuilder = MockMvcRequestBuilders
+//                .get("/api/methods/me.get")
+//                .accept(MediaType.APPLICATION_XML_VALUE);
+//
+//        this.mockMvc.perform(requestBuilder)
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+//                .andExpect(content().string(containsString("\"ok\":false")))
+//                .andExpect(content().string(containsString("\"type\":\"AUTH_RESTART\"")));
+    }
+
+    @Test
+    public void test_apiMethods_meGet_withoutAuthentication() throws Exception {
+        /*
+            HTTP Method: GET
+            Accept: application/json
+
+            Expect:
+                Status: 500
+                Content-Type: application/json
+                Type: AUTH_RESTART
+         */
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/api/methods/me.get")
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(requestBuilder)
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(content().string(containsString("\"ok\":false")))
+                .andExpect(content().string(containsString("\"type\":\"AUTH_RESTART\"")));
+
+        /*
+            HTTP Method: GET
+            Accept: not application/json
+
+            Expect:
+                Status: 302
+                Location: /login
+         */
+
     }
 
     @Test
@@ -261,11 +280,11 @@ public class APIEndpointsTests {
                 .post("/api/signup").with(csrf())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("username", account.getUsername())
-                .param("firstName", account.getPerson().getFirstName())
-                .param("lastName", account.getPerson().getLastName())
-                .param("dateOfBirth", account.getPerson().getDateOfBirth())
-                .param("gender", account.getPerson().getGender().name())
-                .param("email", account.getContact().getEmail())
+//                .param("firstName", account.getPerson().getFirstName())
+//                .param("lastName", account.getPerson().getLastName())
+//                .param("dateOfBirth", account.getPerson().getDateOfBirth())
+//                .param("gender", account.getPerson().getGender().name())
+//                .param("email", account.getContact().getEmail())
                 .param("password", "password");
 
         String expectedJsonResponse = objectMapper.writeValueAsString(new PostSignupResponse());

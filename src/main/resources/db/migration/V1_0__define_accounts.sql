@@ -15,8 +15,6 @@ create table if not exists accounts (
     password_hash varchar(60),
     avatar_id varchar(60),
     email_id uuid references account_emails(id),
-    blocked boolean not null,
-    deleted boolean not null,
     primary key (id)
 );
 

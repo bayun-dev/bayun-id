@@ -40,7 +40,7 @@ const MeDeleteSwapElement = (props: SwapElementProps) => {
             if (r.data.ok) {
                 window.location.replace('/login')
             } else {
-                throw ErrorType.INTERNAL_ERROR
+                throw ErrorType.INTERNAL
             }
         }).catch((e: AxiosError<ErrorBody>) => {
             setDisabledDeleteButton(false)
@@ -51,7 +51,7 @@ const MeDeleteSwapElement = (props: SwapElementProps) => {
             }
 
             const errorBody = e.response.data
-            if (errorBody.type === ErrorType.BAD_REQUEST_PARAMETERS) {
+            if (errorBody.type === ErrorType.INVALID_REQUEST_PARAM) {
                 errorBody.parameters?.forEach(parameter => {
                     if (parameter === 'email') {
                         setPasswordError('Invalid')
@@ -82,7 +82,6 @@ const MeDeleteSwapElement = (props: SwapElementProps) => {
 
 const MeDeleteSection = () => {
 
-    const me = useLoaderData() as Account
     const [swap, setSwap] = useState<boolean>(false)
 
     return <SwapSection title='Delete Bayun ID' description='You can delete your Bayun ID and related data'

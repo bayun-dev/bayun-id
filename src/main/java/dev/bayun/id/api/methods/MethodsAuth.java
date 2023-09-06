@@ -26,12 +26,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
+
 @RestController
-public class MethodAuth {
+public class MethodsAuth {
 
     @Setter
     private AuthenticationService authenticationService;
@@ -51,7 +54,7 @@ public class MethodAuth {
     @Setter
     private String defaultRedirectUrl = "/";
 
-    public MethodAuth(AuthenticationService authenticationService, AccountService accountService, EmailService emailService, MethodHelper methodHelper) {
+    public MethodsAuth(AuthenticationService authenticationService, AccountService accountService, EmailService emailService, MethodHelper methodHelper) {
         this.authenticationService = authenticationService;
         this.accountService = accountService;
         this.emailService = emailService;
@@ -61,14 +64,14 @@ public class MethodAuth {
     @PostMapping(path = "/api/methods/auth.resetPassword",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public AuthResetPasswordResponse resetPassword(@Valid AuthResetPasswordToken token, BindingResult bindingResult) throws MessagingException {
+    public AuthResetPasswordResponse resetPassword(@Valid AuthResetPasswordToken token, BindingResult bindingResult) throws MessagingException, BindException {
         methodHelper.checkBindingResult(bindingResult);
 
         try {
             Account account = accountService.loadUserByUsername(token.getUsername());
             Email email = emailService.loadById(account.getEmailId());
             if (email == null || !email.isConfirmed()) {
-                throw new EmailNotConfirmedException();
+                throw new EmailNotConfirmedException("Unable to reset password because the email is not confirmed: %s".formatted(Objects.requireNonNullElse(email, "null")));
             }
 
             String rawPassword = accountService.resetPassword(account.getId());
@@ -76,7 +79,7 @@ public class MethodAuth {
 
             return new AuthResetPasswordResponse(emailService.toHidden(email.getEmail()));
         } catch (UsernameNotFoundException e) {
-            throw new UsernameUnoccupiedException(e);
+            throw new UsernameUnoccupiedException(token.getUsername(), e);
         }
     }
 
@@ -84,18 +87,16 @@ public class MethodAuth {
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public AuthSignInResponse signIn(@Valid AuthSignInToken token, BindingResult bindingResult,
-            HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) throws BindException {
         methodHelper.checkBindingResult(bindingResult);
 
         try {
             authenticationService.authenticate(UsernamePasswordAuthenticationToken
-                    .unauthenticated(token.username, token.password), request, response);
+                    .unauthenticated(token.getUsername(), token.getPassword()), request, response);
         } catch (UsernameNotFoundException e) {
-            throw new UsernameUnoccupiedException(e);
+            throw new UsernameUnoccupiedException(token.getUsername(), e);
         } catch (BadCredentialsException e) {
-            throw new PasswordInvalidException(e);
-        } catch (Exception e) {
-            throw new InternalErrorException(e);
+            throw new PasswordInvalidException("Unable to authenticate because the password is invalid", e);
         }
 
         return new AuthSignInResponse(retrieveRedirectUrl(request, response));
@@ -112,13 +113,13 @@ public class MethodAuth {
     @PostMapping(path = "/api/methods/auth.signUp",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public AuthSignUpResponse signUp(@Valid AuthSingUpToken token, BindingResult bindingResult) {
+    public AuthSignUpResponse signUp(@Valid AuthSingUpToken token, BindingResult bindingResult) throws BindException {
         methodHelper.checkBindingResult(bindingResult);
 
         try {
             accountService.create(token);
         } catch (DataIntegrityViolationException e) {
-            throw new UsernameOccupiedException(e);
+            throw new UsernameOccupiedException(token.getUsername(), e);
         }
 
         return new AuthSignUpResponse();
